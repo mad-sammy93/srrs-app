@@ -14,52 +14,95 @@ interface LoginResponse {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
+  // const user = ref<User | null>(null)
   const token = ref<string | null>(null)
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
+  const user = ref<{ email: string; password: string; fullName: string } | null>(null)
+  const qrCode = ref<string | null>(null)
+  const step = ref<number>(1) // 🔥 Explicitly defining step
   const router = useRouter()
 
   const isAuthenticated = computed(() => !!token.value)
 
-  const login = async (credentials: Record<string, any>): Promise<void> => {
+  const login = async (credentials: { email: string; password: string }) => {
     loading.value = true
+    error.value = null
+
     try {
       const response = await $fetch<LoginResponse>('/api/auth/login', {
         method: 'POST',
         body: credentials
       })
-      user.value = response.user
+
+      // user.value = response.user
       token.value = response.token
       localStorage.setItem('token', response.token)
     } catch (err: any) {
-      error.value = err.message
+      throw new Error(err.message)
     } finally {
       loading.value = false
     }
   }
 
-  const logout = (): void => {
-    user.value = null
-    token.value = null
-    localStorage.removeItem('token')
-    router.push('/login')
-  }
-
-  const fetchUser = async (): Promise<void> => {
-    const storedToken = localStorage.getItem('token')
-    if (storedToken) {
-      token.value = storedToken
-      try {
-        const response = await $fetch<User>('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token.value}` }
+  // Step 1: Signup and receive QR Code
+  const signup = async (email: string, password: string, fullName: string, otp?: string) => {
+    try {
+      if (otp) {
+        const response = await $fetch('/api/auth/signup', {
+          method: 'POST',
+          body: {
+            email,
+            password,
+            fullName,
+            otp,
+          },
         })
-        user.value = response
-      } catch (err) {
-        logout()
+
+        if (response) {
+          alert('Signup successful! Redirecting...')
+          resetAuth() // ✅ Clear store data
+          return true
+        }
+      } else {
+        const response = await $fetch<{
+          status: number
+          data: { id: number; qrCode: string }
+          message: string
+        }>('/api/auth/signup', {
+          method: 'POST',
+          body: { email, password, fullName },
+        })
+
+        if (response.status === 201) {
+          qrCode.value = response.data.qrCode
+          user.value = { email, fullName, password }
+          step.value = 2 // ✅ Move to 2FA step
+        }
       }
+    } catch (error) {
+      console.error('Signup failed:', error)
     }
   }
 
-  return { user, token, loading, error, isAuthenticated, login, logout, fetchUser }
+  // Reset store
+  const resetAuth = () => {
+    user.value = null
+    qrCode.value = null
+    step.value = 1
+  }
+
+  return {
+    user,
+    token,
+    loading,
+    error,
+    isAuthenticated,
+    qrCode,
+    step,
+    login,
+    signup,
+    // verifyOTP,
+    resetAuth
+  }
 })

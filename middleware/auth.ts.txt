@@ -1,0 +1,15 @@
+import { useAuthStore } from '@/stores/authStore'
+
+export default defineNuxtRouteMiddleware(async (to, from) => {
+  const authStore = useAuthStore()
+
+  // Ensure user data is loaded before navigating
+  if (!authStore.user) {
+    // await authStore.fetchUser()
+  }
+
+  // Redirect to login if not authenticated
+  if (!authStore.isAuthenticated) {
+    return navigateTo('/auth/signin', { replace: true })
+  }
+})

@@ -7,16 +7,16 @@ interface Item {
   description?: string
 }
 
-export const useDataStore = defineStore('data', () => {
-  const items = ref<Item[]>([])
+export const useDataStore = defineStore('users', () => {
+  const users = ref<Item[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
-  const fetchItems = async (): Promise<void> => {
+  const fetchUsers = async (): Promise<void> => {
     loading.value = true
     try {
-      const response = await $fetch<Item[]>('/api/items') // API call
-      items.value = response
+      const response = await $fetch<Item[]>('/api/users') // API call
+      users.value = response
     } catch (err: any) {
       error.value = err.message
     } finally {
@@ -24,5 +24,5 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
-  return { items, loading, error, fetchItems }
+  return { users, loading, error, fetchUsers }
 })

@@ -8,14 +8,27 @@ interface User {
   email: string
 }
 
+// interface LoginResponse {
+//   user: User
+//   token: string
+// }
 interface LoginResponse {
-  user: User
-  token: string
+  status: number;
+  data: {
+    isTwoFAEnabled: boolean;
+    accessToken: string;
+  };
+  message: string;
 }
 
 export const useAuthStore = defineStore('auth', () => {
   // const user = ref<User | null>(null)
+  const authStore = useAuthStore();
+
   const token = ref<string | null>(null)
+  const refreshToken = ref<string | null>(null);
+  const showOtpScreen = ref(false);
+  const tempToken = ref<string | null>(null);
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
   const user = ref<{ email: string; password: string; fullName: string } | null>(null)
@@ -25,25 +38,75 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
-  const login = async (credentials: { email: string; password: string }) => {
-    loading.value = true
-    error.value = null
+  const setTokens = (newAccessToken: string, newRefreshToken: string) => {
+    token.value = newAccessToken;
+    refreshToken.value = newRefreshToken;
+  };
 
+  const clearTokens = () => {
+    token.value = null;
+    refreshToken.value = null;
+  };
+
+  // const login = async (credentials: { email: string; password: string }) => {
+  //   loading.value = true
+  //   error.value = null
+
+  //   try {
+  //     const response = await $fetch<LoginResponse>('/api/auth/login', {
+  //       method: 'POST',
+  //       body: credentials
+  //     })
+
+  //     // user.value = response.user
+  //     token.value = response.token
+  //     localStorage.setItem('token', response.token)
+  //   } catch (err: any) {
+  //     throw new Error(err.message)
+  //   } finally {
+  //     loading.value = false
+  //   }
+  // }
+  const login = async (credentials: { email: string; password: string }) => {
     try {
       const response = await $fetch<LoginResponse>('/api/auth/login', {
         method: 'POST',
-        body: credentials
+        body: credentials,
       })
 
-      // user.value = response.user
-      token.value = response.token
-      localStorage.setItem('token', response.token)
+      if (response.data.isTwoFAEnabled) {
+        tempToken.value = response.data.accessToken
+        return true // Indicates OTP is needed
+      } else {
+        token.value = response.data.accessToken
+        localStorage.setItem('token', response.data.accessToken)
+        return false // No OTP required, user is logged in
+      }
     } catch (err: any) {
-      throw new Error(err.message)
-    } finally {
-      loading.value = false
+      throw new Error(err.message || 'Login failed.')
     }
   }
+
+
+  const verifyOtp = async (otp: string) => {
+    try {
+      const response: LoginResponse = await $fetch('/api/auth/2fa/authenticate', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${tempToken.value}`
+        },
+        body: { otp }
+      })
+
+      token.value = response.data.accessToken
+      localStorage.setItem('token', response.data.accessToken)
+      tempToken.value = null // Clear temp token
+    } catch (err: any) {
+      throw new Error(err.message || 'OTP verification failed.')
+    }
+  }
+
+
 
   // Step 1: Signup and receive QR Code
   const signup = async (email: string, password: string, fullName: string, otp?: string) => {
@@ -100,9 +163,16 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     qrCode,
     step,
+    tempToken,
+    refreshToken,
+    setTokens,
+    clearTokens,
     login,
     signup,
-    // verifyOTP,
-    resetAuth
+    resetAuth,
+    verifyOtp
+  }
+  {
+    persist: true // Ensures tokens persist across page reloads
   }
 })

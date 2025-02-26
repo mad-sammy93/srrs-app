@@ -1,0 +1,13 @@
+import { useAuthStore } from '@/stores/authStore'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  const authStore = useAuthStore()
+  const router = useRouter()
+
+  nuxtApp.hook('app:mounted', () => {
+    // Ensure the store has hydrated
+    if (!authStore.refreshToken) {
+      router.replace('/auth/signin')
+    }
+  })
+})

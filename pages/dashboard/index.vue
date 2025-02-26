@@ -6,6 +6,9 @@
 
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: 'auth-ts',
+})
 </script>
 
 <style scoped>

@@ -1,11 +1,14 @@
 <template>
   <div>
-    <UIJumbotron />
+    <h1>{{authStore.isAuthenticated}}</h1>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  middleware: 'auth-ts',
-})
+import { useAuthStore } from '~/stores/authStore'
+
+const authStore = useAuthStore()
+
+
+
 </script>

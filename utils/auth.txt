@@ -11,7 +11,7 @@ export async function refreshAccessToken() {
   }
 
   if (!authStore.refreshToken) {
-    router.push("/auth/signin");
+    router.push("/auth/login");
     return null;
   }
 

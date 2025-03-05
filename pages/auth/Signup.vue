@@ -96,7 +96,7 @@ const handleSignup = async () => {
 const handleOTP = async () => {
   const success = await authStore.signup(email.value, password.value, fullName.value ,String(otp.value) )
   if (success) {
-    router.push('/auth/signin')
+    router.push('/auth/login')
   }
 }
 </script>

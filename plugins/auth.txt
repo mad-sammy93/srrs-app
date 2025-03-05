@@ -7,7 +7,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.hook('app:mounted', () => {
     // Ensure the store has hydrated
     if (!authStore.refreshToken) {
-      router.replace('/auth/signin')
+      router.replace('/auth/login')
     }
   })
 })

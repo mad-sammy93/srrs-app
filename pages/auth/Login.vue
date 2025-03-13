@@ -69,6 +69,7 @@ definePageMeta({
   layout: 'auth',
 })
 
+
 useHead({ title: 'Sign In' })
 
 const router = useRouter()
@@ -88,14 +89,14 @@ const handleSubmit = async () => {
     if (showOtpScreen.value) {
       // OTP Step
       await authStore.verifyOtp(otp.value)
-      router.push('/') // Redirect after OTP verification
+      router.push('/dashboard') // Redirect after OTP verification
     } else {
       // Login Step
       const needsOtp = await authStore.login(form.value)
       if (needsOtp) {
         showOtpScreen.value = true
       } else {
-        router.push('/') // Redirect after successful login
+        router.push('/dashboard') // Redirect after successful login
       }
     }
   } catch (err: any) {

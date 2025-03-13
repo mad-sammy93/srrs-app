@@ -8,10 +8,6 @@ interface User {
   email: string
 }
 
-// interface LoginResponse {
-//   user: User
-//   token: string
-// }
 interface LoginResponse {
   status: number;
   data: {
@@ -24,7 +20,6 @@ interface LoginResponse {
 export const useAuthStore = defineStore('auth', () => {
   // const user = ref<User | null>(null)
   const authStore = useAuthStore();
-
   const token = ref<string | null>(null)
   const refreshToken = ref<string | null>(null);
   const showOtpScreen = ref(false);
@@ -48,25 +43,6 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = null;
   };
 
-  // const login = async (credentials: { email: string; password: string }) => {
-  //   loading.value = true
-  //   error.value = null
-
-  //   try {
-  //     const response = await $fetch<LoginResponse>('/api/auth/login', {
-  //       method: 'POST',
-  //       body: credentials
-  //     })
-
-  //     // user.value = response.user
-  //     token.value = response.token
-  //     localStorage.setItem('token', response.token)
-  //   } catch (err: any) {
-  //     throw new Error(err.message)
-  //   } finally {
-  //     loading.value = false
-  //   }
-  // }
   const login = async (credentials: { email: string; password: string }) => {
     try {
       const response = await $fetch<LoginResponse>('/api/auth/login', {
@@ -84,6 +60,18 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (err: any) {
       throw new Error(err.message || 'Login failed.')
+    }
+  }
+
+  const logout = async () => { //TODO : Fix logout
+    try {
+      await $fetch('/api/auth/logout', {
+        method: 'POST',
+      })
+      token.value = null
+      localStorage.removeItem('token')
+    } catch (err: any) {
+      throw new Error(err.message || 'Logout failed.')
     }
   }
 
@@ -105,8 +93,6 @@ export const useAuthStore = defineStore('auth', () => {
       throw new Error(err.message || 'OTP verification failed.')
     }
   }
-
-
 
   // Step 1: Signup and receive QR Code
   const signup = async (email: string, password: string, fullName: string, otp?: string) => {
@@ -168,11 +154,11 @@ export const useAuthStore = defineStore('auth', () => {
     setTokens,
     clearTokens,
     login,
+    logout,
     signup,
     resetAuth,
     verifyOtp
   }
-  {
-    persist: true // Ensures tokens persist across page reloads
-  }
+}, {
+  persist: true // Ensures tokens persist across page reloads
 })

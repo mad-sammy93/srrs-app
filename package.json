@@ -12,6 +12,9 @@
   "dependencies": {
     "@nuxtjs/tailwindcss": "^6.13.1",
     "@pinia/nuxt": "^0.10.1",
+    "@syncfusion/ej2-schedule": "^28.2.7",
+    "@syncfusion/ej2-vue-grids": "^28.2.11",
+    "@syncfusion/ej2-vue-schedule": "^28.2.11",
     "nuxt": "^3.15.4",
     "pinia": "^3.0.1",
     "pinia-plugin-persistedstate": "^4.2.0",

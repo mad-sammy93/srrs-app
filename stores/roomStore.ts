@@ -1,21 +1,6 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
-
-interface RoomItem {
-  id: number
-  agenda: string
-  meetingDate: string
-  startDateTime: string
-  endDateTime: string
-  isRecurring: boolean
-  createdAt: string
-  room: {
-    id: number
-    roomName: string
-    hexColor: string
-  }
-  paxCount: number
-}
+import type { RoomItem } from '@/types'
 
 export const useRoomStore = defineStore('room', () => {
 

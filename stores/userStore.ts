@@ -1,27 +1,19 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { ref } from 'vue'
-
-interface Item {
- id: number;
- email: string;
- fullName: string;
- userStatusId: number;
-}
+import type { UserItem } from '@/types'
 
 export const useUserStore = defineStore('users', () => {
   const authStore = useAuthStore()
   const token = authStore.token
-  const usersList = ref<Item[]>([])
+  const usersList = ref<UserItem[]>([])
   const loading = ref<boolean>(false)
-  const error = ref<string | null>(null)
-  console.log(token);
-  
+  const error = ref<string | null>(null)  
 
   const fetchUsers = async (params: { pageNo: number; limit: number; userStatusId?: number })=> {
     loading.value = true
     try { 
-      const response = await $fetch<Item[]>(`/api/users?${ params.pageNo ? `pageNo=${params.pageNo}` : '' }${ params.limit ? `&limit=${params.limit}` : '' }${ params.userStatusId ? `&userStatusId=${params.userStatusId}` : '' }`,
+      const response = await $fetch<UserItem[]>(`/api/users?${params.pageNo ? `pageNo=${params.pageNo}` : ''}${params.limit ? `&limit=${params.limit}` : ''}${params.userStatusId ? `&userStatusId=${params.userStatusId}` : ''}`,
         {
           method: 'GET',
           headers: {

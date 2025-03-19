@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h1 class="text-4xl text-white ">Welcome</h1>
+    <h1 class="text-4xl text-blue-500 ">Welcome {{ authStore.userName }}</h1>
+    <span>Room Booking System is a booking application designed for teams.</span>
   </div>
 </template>
 

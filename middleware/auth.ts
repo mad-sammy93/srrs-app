@@ -37,8 +37,24 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   const refreshToken = useCookie('refreshToken') // ✅ Reads refresh token from cookies
 
   // If access token exists OR refresh token is in cookies, allow access
-  if (authStore.token || refreshToken.value) {
-    return
+  if (authStore.token) {
+    try {
+      await authStore.refreshAuthToken()  //  authStore.refreshAuthToken()
+      console.log('Access token refreshed');
+
+      return
+    }
+    catch (error) {
+      console.log('No access token or refresh token found');
+      authStore.clearTokens()
+      authStore.refreshAuthToken()
+    }
+    return navigateTo('/auth/login')
+  }
+  else {
+    console.log('No access token or refresh token found');
+    authStore.clearTokens()
+    authStore.refreshAuthToken()
   }
 
   return navigateTo('/auth/login')

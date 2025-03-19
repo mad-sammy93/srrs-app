@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 
 interface User {
   id: number
-  name: string
+  fullName: string
   email: string
 }
 
@@ -17,9 +17,15 @@ interface LoginResponse {
   message: string;
 }
 
+interface RefreshResponse {
+  data: {
+    accessToken: string;
+  };
+  message: string;
+}
+
 export const useAuthStore = defineStore('auth', () => {
-  // const user = ref<User | null>(null)
-  const authStore = useAuthStore();
+  const userName = ref<User | null>(null)
   const token = ref<string | null>(null)
   const refreshToken = ref<string | null>(null);
   const showOtpScreen = ref(false);
@@ -33,9 +39,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
-  const setTokens = (newAccessToken: string, newRefreshToken: string) => {
-    token.value = newAccessToken;
-    refreshToken.value = newRefreshToken;
+  const setUsernameFromToken = (jwtToken: string) => {
+    try {
+      const decodedToken = JSON.parse(atob(jwtToken.split('.')[1]));
+      userName.value = { id: decodedToken.id, fullName: decodedToken.fullName, email: decodedToken.email };
+    } catch (error) {
+      console.error('Error decoding token:', error);
+    }
+  };
+
+  const setTokens = (newAccessToken: string) => {
+    token.value = newAccessToken
+    localStorage.setItem('token', newAccessToken)
+    setUsernameFromToken(newAccessToken);
   };
 
   const clearTokens = () => {
@@ -54,8 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
         tempToken.value = response.data.accessToken
         return true // Indicates OTP is needed
       } else {
-        token.value = response.data.accessToken
-        localStorage.setItem('token', response.data.accessToken)
+        setTokens(response.data.accessToken)
         return false // No OTP required, user is logged in
       }
     } catch (err: any) {
@@ -67,14 +82,30 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await $fetch('/api/auth/logout', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
       })
-      token.value = null
-      localStorage.removeItem('token')
+      clearTokens()
     } catch (err: any) {
       throw new Error(err.message || 'Logout failed.')
     }
   }
 
+
+  const refreshAuthToken = async () => {
+    try {
+      const response = await $fetch<RefreshResponse>('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      })
+      setTokens(response.data.accessToken)
+    } catch (err: any) {
+      throw new Error(err.message || 'Token refresh failed.')
+    }
+  }
 
   const verifyOtp = async (otp: string) => {
     try {
@@ -86,8 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
         body: { otp }
       })
 
-      token.value = response.data.accessToken
-      localStorage.setItem('token', response.data.accessToken)
+      setTokens(response.data.accessToken)
       tempToken.value = null // Clear temp token
     } catch (err: any) {
       throw new Error(err.message || 'OTP verification failed.')
@@ -142,6 +172,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
+    userName,
     user,
     token,
     loading,
@@ -151,6 +182,8 @@ export const useAuthStore = defineStore('auth', () => {
     step,
     tempToken,
     refreshToken,
+    setUsernameFromToken,
+    refreshAuthToken,
     setTokens,
     clearTokens,
     login,

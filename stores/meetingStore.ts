@@ -64,7 +64,21 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   };
 
 
-  const bookMeetingRoom = async (agenda: string, meetingDate: string, startTime: string, endTime: string, roomId: number, userId: number, memberIds: number[], isRecurring: boolean, recurrencePatternId: number, frequency: number, weekdayId: number) => {
+  const bookMeetingRoom = async (
+    bookingData: {
+      agenda: string;
+      meetingDate: string;
+      startTime: string;
+      endTime: string;
+      roomId: number;
+      userId: number;
+      memberIds: number[];
+      isRecurring: boolean;
+      recurrencePatternId: number;
+      frequency: number;
+      weekdayId: number;
+    }
+  ) => {
     try {
       const response = await $fetch<BookMeetingRoomResponse>('/api/booked-meeting-rooms', {
         method: 'POST',
@@ -72,20 +86,13 @@ export const useMeetingStore = defineStore('meetingStore', () => {
           Authorization: token ? `Bearer ${token}` : '' // Add token if available
         },
         body: {
-          agenda,
-          meetingDate,
-          startTime,
-          endTime,
-          roomId,
-          userId,
-          memberIds,
-          isRecurring,
-          recurrencePatternId,
-          frequency,
-          weekdayId
+          bookingData
         }
       });
       if (!response) throw new Error('Failed to book meeting room')
+      return { data: response, error: null }; // Return the response data and null error
+
+
     } catch (err: any) {
       error.value = err.message || 'Failed to book meeting room';
     }

@@ -8,12 +8,18 @@ export const useUserStore = defineStore('users', () => {
   const token = authStore.token
   const usersList = ref<UserItem[]>([])
   const loading = ref<boolean>(false)
-  const error = ref<string | null>(null)  
+  const error = ref<string | null>(null)
 
-  const fetchUsers = async (params: { pageNo: number; limit: number; userStatusId?: number })=> {
+  const fetchUsers = async (params: { pageNo: number; limit: number; userStatusId?: number }) => {
     loading.value = true
-    try { 
-      const response = await $fetch<UserItem[]>(`/api/users?${params}`,
+    try {
+      const searchParams = new URLSearchParams();
+      searchParams.append('pageNo', params.pageNo.toString());
+      searchParams.append('limit', params.limit.toString());
+      if (params.userStatusId !== undefined) {
+        searchParams.append('userStatusId', params.userStatusId.toString());
+      }
+      const response = await $fetch<UserItem[]>(`/api/users?${searchParams.toString()}`,
         {
           method: 'GET',
           headers: {

@@ -38,11 +38,16 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Check if access token exists
   if (authStore.token) {
+    console.log('Access token exists');
+    authStore.refreshAuthToken();
+
     return;
   }
 
   // If no access token but refresh token exists, try refreshing
   if (refreshToken.value) {
+    console.log('Refreshing access token...', refreshToken.value);
+
     try {
       const success = await authStore.refreshAuthToken(); // Ensure refreshAuthToken returns a success status
       if (success) {

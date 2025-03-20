@@ -36,8 +36,8 @@ onMounted(() => {
     userStatusId: 1,
   };
   const MeetingParams = {
-    fromDate: '2024-03-01',
-    toDate: '2025-03-31',
+    fromDate: '2025-01-01',
+    toDate: '2025-04-31',
     status: 'UPCOMING',
     searchTerm: '',
     pageNo: 1,

@@ -1,6 +1,6 @@
 <template>
   <div class="py-[25px] mx-auto max-w-[1440px]">
-    <pre>{{ meetingData }}</pre>
+    <!-- <pre>{{ meetingData }}</pre> -->
     <ejs-schedule
       height="550px"
       width="100%"
@@ -48,6 +48,7 @@ import { props } from "@syncfusion/ej2-vue-schedule/src/schedule/schedule.compon
 
 const meetingProps = defineProps({
   meetings: Object,
+  userData: Object
 });
 
 // Provide Syncfusion modules

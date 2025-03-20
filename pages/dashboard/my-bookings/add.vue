@@ -2,9 +2,9 @@
   <div class="min-w-[800px] mx-auto p-6 bg-white shadow-md rounded-lg">
     <h2 class="text-xl font-semibold mb-4">Book a Meeting Room</h2>
 
-    <!-- {{ rooms }} -->
+    {{ rooms }}
 
-    {{ user }}
+    <!-- {{ user }} -->
     <form @submit.prevent="submitBooking">
       <!-- Agenda -->
       <div class="mb-4">
@@ -41,7 +41,7 @@
         <label class="block font-medium">Select Room</label>
         <select v-model="form.roomId" class="input-field">
           <option v-for="room in rooms" :key="room.id" :value="room.id">
-            {{ room.name }}
+            {{ room.room }}
           </option>
         </select>
       </div>
@@ -50,8 +50,9 @@
       <div class="mb-4">
         <label class="block font-medium">Select Members</label>
         <select v-model="form.memberIds" multiple class="input-field">
-          <option v-for="member in members" :key="member.id" :value="member.id">
-            {{ member.name }}
+          <option v-for="member in user" :key="member.id" :value="member.id">
+            {{ member.id }}
+            {{ member.fullName }}
           </option>
         </select>
       </div>
@@ -99,7 +100,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoomStore } from "@/stores/roomStore";
 import { useUserStore } from '@/stores/userStore';
@@ -116,7 +117,7 @@ const form = ref({
   meetingEndDate: "",
   startTime: "",
   endTime: "",
-  roomId: null,
+  roomId: 0, 
   userId: 0,
   memberIds: [],
   isRecurring: false,
@@ -132,10 +133,16 @@ const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Frida
 const loading = ref(false);
 const successMessage = ref("");
 
+
 // Fetch Rooms & Members on Page Load
 onMounted(async () => {
+  const userParams = {
+  pageNo: 1,
+  limit: 10,
+  userStatusId:1
+}
   await roomStore.fetchRoomsData();
-  await userStore.fetchUsers('pageNo=1&limit=10&userStatusId=1');
+  await userStore.fetchUsers(userParams);
   // rooms.value = roomResponse.data.value || [];
 
   // const memberResponse = await useFetch("/api/members");
@@ -149,7 +156,7 @@ const resetForm = () => {
     meetingEndDate: "",
     startTime: "",
     endTime: "",
-    roomId: null,
+    roomId: 0,
     userId: 0,
     memberIds: [],
     isRecurring: false,
@@ -164,15 +171,19 @@ const submitBooking = async () => {
   successMessage.value = "";
 
   try {
-    const { data, error } = await meetingStore.bookMeetingRoom(form.value);
-    console.log(data);
+    const bookingData = {
+      ...form.value,
+      roomId: form.value.roomId ?? 0, // Convert roomId to a number if it's not null
+    };
+    const response = await meetingStore.bookMeetingRoom(bookingData);
+    console.log('SUBMIT FORM',response);
     
-    if (error.value) throw new Error(error.value.message);
+    // if (error.value) throw new Error(error.value.message);
 
     successMessage.value = "Meeting successfully booked!";
     resetForm();
   } catch (error) {
-    alert("Error booking meeting: " + error.message);
+    alert("Error booking meeting: " );
   }
 
   loading.value = false;

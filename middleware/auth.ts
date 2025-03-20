@@ -33,29 +33,31 @@
 import { useAuthStore } from '@/stores/authStore'
 
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const authStore = useAuthStore()
-  const refreshToken = useCookie('refreshToken') // ✅ Reads refresh token from cookies
+  const authStore = useAuthStore();
+  const refreshToken = useCookie('refreshToken');
 
-  // If access token exists OR refresh token is in cookies, allow access
+  // Check if access token exists
   if (authStore.token) {
+    return;
+  }
+
+  // If no access token but refresh token exists, try refreshing
+  if (refreshToken.value) {
     try {
-      await authStore.refreshAuthToken()  //  authStore.refreshAuthToken()
-      console.log('Access token refreshed');
-
-      return
+      const success = await authStore.refreshAuthToken(); // Ensure refreshAuthToken returns a success status
+      if (success) {
+        console.log('Access token refreshed successfully');
+        return;
+      } else {
+        console.error('Token refresh failed');
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
     }
-    catch (error) {
-      console.log('No access token or refresh token found');
-      authStore.clearTokens()
-      authStore.refreshAuthToken()
-    }
-    return navigateTo('/auth/login')
-  }
-  else {
-    console.log('No access token or refresh token found');
-    authStore.clearTokens()
-    authStore.refreshAuthToken()
   }
 
-  return navigateTo('/auth/login')
-})
+  // Clear tokens and redirect to login if refresh fails or no tokens exist
+  console.log('Redirecting to login...');
+  authStore.clearTokens();
+  return navigateTo('/auth/login');
+});

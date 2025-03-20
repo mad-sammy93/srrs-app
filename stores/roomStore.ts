@@ -6,49 +6,22 @@ export const useRoomStore = defineStore('room', () => {
 
   const authStore = useAuthStore()
   const roomList = ref<RoomItem[]>([])
+  ///booked-meeting-rooms?myBookingsOnly=false&pageNo=1&limit=10'
 
-  const fetchBookedMeetingRooms = async (params: {
-    myBookingsOnly?: boolean
-    pageNo: number
-    limit: number
-    fromDate?: string
-    toDate?: string
-    status?: string
-    searchTerm?: string
-  }) => {
+  const fetchRoomsData = async () => {
     try {
-      const token = authStore.token // Get token from auth store
-
-      // Convert params to a Record<string, string>
-      const query = new URLSearchParams(
-        Object.fromEntries(
-          Object.entries(params).map(([key, value]) => [key, String(value)])
-        )
-      ).toString()
-
-      const response = await fetch(`/api/booked-meeting-rooms?${query}`, {
+      const response = await $fetch<RoomItem[]>('/api/rooms', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '' // Add token if available
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       })
-
-      if (response.ok) {
-        const data = await response.json()
-        console.log(data);
-
-        roomList.value = data
-      }
-
-      if (!response.ok) throw new Error('Failed to fetch meeting rooms')
-
-      return await response.json()
+      roomList.value = response
     } catch (err) {
-      console.error('Error fetching meeting rooms:', err)
-      return null
-    }
+      console.error('Error fetching rooms:', err)
+    } 
   }
 
-  return { roomList, fetchBookedMeetingRooms }
+  return { roomList, fetchRoomsData }
 })

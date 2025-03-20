@@ -95,16 +95,20 @@ export const useAuthStore = defineStore('auth', () => {
 
   const refreshAuthToken = async () => {
     try {
-      const response = await $fetch<RefreshResponse>('/api/auth/refresh', {
+      const response = await $fetch<RefreshResponse>('/api/auth/refresh-token', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token.value}`,
-        },
-      })
-      setTokens(response.data.accessToken)
-    } catch (err: any) {
-      throw new Error(err.message || 'Token refresh failed.')
+        credentials: 'include',
+      });
+      if (response?.data.accessToken) {
+        token.value = response.data.accessToken;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      return false;
     }
+
   }
 
   const verifyOtp = async (otp: string) => {

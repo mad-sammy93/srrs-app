@@ -1,6 +1,6 @@
 <template>
   <div class="py-[25px] mx-auto max-w-[1440px]">
-    <!-- <pre>{{ meetings }}</pre> -->
+    <pre>{{ meetingData }}</pre>
     <ejs-schedule
       height="550px"
       width="100%"
@@ -57,17 +57,20 @@ provide("schedule", [Day, Week, WorkWeek, Month, Agenda]);
 const selectedDate = ref(new Date());
 
 
-const meetingData = meetingProps.meetings.data
+const meetingData = ref([]); // Initialize meetingData as an empty array
+meetingData.value = meetingProps.meetings
 // Reactive data for event settings
 const eventSettings = ref({
-  dataSource: meetingData,
+  dataSource: meetingData.value,
   fields: {
-    id: "Id",
-    subject: { name: "meetingData" },
-    isAllDay: { name: "IsAllDay" },
+    id: "id",
+    subject: { name: "agenda" }, 
     startTime: { name: "startDateTime" },
     endTime: { name: "endDateTime" },
-  },
+    isAllDay: { name: "isAllDay", defaultValue: false },
+    location: { name: "room.roomName" },
+    color: { name: "room.hexColor" }, // Use room color
+  }
 });
 
 // Owner data source (rooms mapped to owners)

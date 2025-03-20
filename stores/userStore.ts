@@ -13,7 +13,7 @@ export const useUserStore = defineStore('users', () => {
   const fetchUsers = async (params: { pageNo: number; limit: number; userStatusId?: number })=> {
     loading.value = true
     try { 
-      const response = await $fetch<UserItem[]>(`/api/users?${params.pageNo ? `pageNo=${params.pageNo}` : ''}${params.limit ? `&limit=${params.limit}` : ''}${params.userStatusId ? `&userStatusId=${params.userStatusId}` : ''}`,
+      const response = await $fetch<UserItem[]>(`/api/users?${params}`,
         {
           method: 'GET',
           headers: {

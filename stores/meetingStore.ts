@@ -7,7 +7,7 @@ import type { MeetingItem, FetchMeetingResponse, BookMeeting, BookMeetingRoomRes
 export const useMeetingStore = defineStore('meetingStore', () => {
   const authStore = useAuthStore();
   const token = authStore.token;
-  const meetings = ref<MeetingItem[]>([]);
+  const bookings = ref<MeetingItem[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -50,14 +50,14 @@ export const useMeetingStore = defineStore('meetingStore', () => {
         const data = await response.data.list
         console.log(data);
 
-        meetings.value = data
+        bookings.value = data
       }
 
       if (!response) throw new Error('Failed to fetch meeting rooms')
       
-      // meetings.value = data.value?.data?.list || [];
+      // bookings.value = data.value?.data?.list || [];
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch meetings';
+      error.value = err.message || 'Failed to fetch bookings';
     } finally {
       loading.value = false;
     }
@@ -106,7 +106,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   }
 
   return {
-    meetings,
+    bookings,
     loading,
     error,
     fetchBookedMeeting,

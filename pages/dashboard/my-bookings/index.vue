@@ -15,11 +15,11 @@ import { useMeetingStore } from '@/stores/meetingStore';
 import type { MeetingItem } from '@/types';
 
 const meetingStore = useMeetingStore()
-const bookings = computed(() => meetingStore.meetings)
+const bookings = computed(() => meetingStore.bookings)
 
 onMounted(() => {
   const params = {
-    myBookingsOnly: false,
+    myBookingsOnly: true,
     pageNo: 1,
     limit: 10
   }

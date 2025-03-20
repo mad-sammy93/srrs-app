@@ -5,7 +5,7 @@
       <h1 class="text-5xl text-blue-500 mb-4">Welcome {{ authStore.userName?.fullName }}</h1>
       <span class="text-slate-600 text-xl">Room Booking System is a booking application designed for teams.</span>
     </div>
-    <WidgetCalendar :meetings="meetings.meetings"  />
+    <WidgetCalendar :meetings="bookings.bookings"  />
     <!-- {{ users.usersList }} -->
       <!-- <pre>{{ meetings.meetings }}</pre> -->
   </div>
@@ -27,7 +27,7 @@ definePageMeta({
 
 const userStore = useUserStore();
 const users = storeToRefs(userStore);
-const meetings = storeToRefs(meetingStore);
+const bookings = storeToRefs(meetingStore);
 
 onMounted(() => {
   const params = {

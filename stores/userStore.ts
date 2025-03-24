@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { ref } from 'vue'
-import type { UserItem } from '@/types'
+import type { User, FetchUserResponse } from '@/types'
 
 export const useUserStore = defineStore('users', () => {
   const authStore = useAuthStore()
   const token = authStore.token
-  const usersList = ref<UserItem[]>([])
+  const usersList = ref<User[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
@@ -19,7 +19,7 @@ export const useUserStore = defineStore('users', () => {
       if (params.userStatusId !== undefined) {
         searchParams.append('userStatusId', params.userStatusId.toString());
       }
-      const response = await $fetch<UserItem[]>(`/api/users?${searchParams.toString()}`,
+      const response = await $fetch<FetchUserResponse>(`/api/users?${searchParams.toString()}`,
         {
           method: 'GET',
           headers: {
@@ -28,7 +28,9 @@ export const useUserStore = defineStore('users', () => {
           }
         }
       ) // Updated endpoint
-      usersList.value = response
+      console.log('[FETCH USERS]', response.data.list);
+
+      usersList.value = response.data.list
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error'
     } finally {

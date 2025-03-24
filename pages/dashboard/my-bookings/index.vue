@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { useMeetingStore } from '@/stores/meetingStore';
-import type { MeetingItem } from '@/types';
+import type { Meeting } from '@/types';
 
 const meetingStore = useMeetingStore()
 const bookings = computed(() => meetingStore.bookings)
@@ -26,10 +26,10 @@ onMounted(() => {
   meetingStore.fetchBookedMeeting(params)
 })
 
-const editBookedMeetingRoom = (meeting: MeetingItem) => {
+const editBookedMeetingRoom = (meeting: Meeting) => {
   console.log(meeting)
 }
-const cancelBookedMeetingRoom = (meeting: MeetingItem) => {
+const cancelBookedMeetingRoom = (meeting: Meeting) => {
   //check reason for cancel
   console.log(meeting)
 }

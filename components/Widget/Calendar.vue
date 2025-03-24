@@ -1,20 +1,25 @@
 <template>
   <div class="py-[25px] mx-auto max-w-[1440px]">
-    <!-- <pre>{{ meetingData }}</pre> -->
+    <!-- <pre>{{ meetingProps.userData }}</pre> -->
     <ejs-schedule
       height="550px"
       width="100%"
+      :currentDate="currentDate"
+      :views="views"
+      :resources="resources"
+      
+      :showTimeIndicator="true"
       :selectedDate="selectedDate"
       :eventSettings="eventSettings"
     >
-      <e-views>
+      <!-- <e-views>
         <e-view option="Day"></e-view>
         <e-view option="Week"></e-view>
         <e-view option="WorkWeek"></e-view>
         <e-view option="Month"></e-view>
-        <!-- <e-view option="Agenda"></e-view> -->
-      </e-views>
-      <e-resources>
+        <e-view option="Agenda"></e-view>
+      </e-views> -->
+      <!-- <e-resources>
         <e-resource
           field="OwnerId"
           title="Owner"
@@ -25,7 +30,7 @@
           colorField="OwnerColor"
         >
         </e-resource>
-      </e-resources>
+      </e-resources> -->
     </ejs-schedule>
   </div>
 </template>
@@ -60,6 +65,7 @@ const selectedDate = ref(new Date());
 
 const meetingData = ref([]); // Initialize meetingData as an empty array
 meetingData.value = meetingProps.meetings
+
 // Reactive data for event settings
 const eventSettings = ref({
   dataSource: meetingData.value,
@@ -74,8 +80,23 @@ const eventSettings = ref({
   }
 });
 
+const resources = ref([
+  {
+    field: "OwnerId",
+    title: "Owner",
+    name: "Owners",
+    dataSource: meetingProps.userData,
+    textField: "OwnerText",
+    idField: "Id",
+    colorField: "OwnerColor",
+  },
+]);
+
+// views: ['Week', 'TimelineWeek', 'Month', 'TimelineMonth'],
+const views = ref(["Month", "Agenda"]);
 // Owner data source (rooms mapped to owners)
-const ownerDataSource = ref([]);
+const ownerDataSource = ref([]); //userData
+ownerDataSource.value = meetingProps.userData
 </script>
 
 <style>

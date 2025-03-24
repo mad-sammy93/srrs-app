@@ -1,18 +1,18 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useAuthStore } from './authStore';
-import type { MeetingItem, FetchMeetingResponse, BookMeeting, BookMeetingRoomResponse } from '@/types'
+import type { Meeting, FetchMeetingResponse, BookMeeting, BookMeetingRoomResponse } from '@/types'
 
 
 export const useMeetingStore = defineStore('meetingStore', () => {
   const authStore = useAuthStore();
   const token = authStore.token;
-  const bookings = ref<MeetingItem[]>([]);
+  const bookings = ref<Meeting[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
 
   // Fetch meeting data with dynamic parameters
-  const fetchBookedMeeting = async (params: { 
+  const fetchBookedMeeting = async (params: {
     roomId?: number;
     fromDate?: string;
     toDate?: string;
@@ -43,18 +43,18 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       const response = await $fetch<FetchMeetingResponse>(`/api/booked-meeting-rooms?${query}`, {
         method: 'GET',
         headers: {
-          Authorization: token ? `Bearer ${token}` : '' // Add token if available
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       });
       if (response) {
-        const data = await response.data.list
+        const data = response.data.list
         console.log(data);
 
         bookings.value = data
       }
 
       if (!response) throw new Error('Failed to fetch meeting rooms')
-      
+
       // bookings.value = data.value?.data?.list || [];
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch bookings';
@@ -64,29 +64,31 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   };
 
 
-  const bookMeetingRoom = async (
-    bookingData: {
-      agenda: string;
-      meetingDate: string;
-      startTime: string;
-      endTime: string;
-      roomId: number;
-      userId: number;
-      memberIds: number[];
-      isRecurring: boolean;
-      recurrencePatternId: number;
-      frequency: number;
-      weekdayId: number;
-    }
-  ) => {
+  const bookMeetingRoom = async (formData: {
+    agenda: string;
+    meetingDate: string;
+    meetingEndDate?: string;
+    startTime: string;
+    endTime: string;
+    roomId: number;
+    userId: number;
+    memberIds: number[];
+    isRecurring: boolean;
+    recurrencePatternId?: number | null;
+    frequency?: number | null;
+    weekdayId?: number | null;
+  }) => {
     try {
+      const cleanData = Object.fromEntries(
+        Object.entries(formData).filter(([_, value]) =>
+          value !== null && value !== undefined && value !== ''
+        )
+      );
       const response = await $fetch<BookMeetingRoomResponse>('/api/booked-meeting-rooms', {
+        body: cleanData,
         method: 'POST',
         headers: {
-          Authorization: token ? `Bearer ${token}` : '' // Add token if available
-        },
-        body: {
-          bookingData
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       });
       if (!response) throw new Error('Failed to book meeting room')
@@ -101,9 +103,23 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   const editBookedMeetingRoom = async (meetingId: number) => {
     try {
       const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
-          Authorization: token ? `Bearer ${token}` : '' // Add token if available
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
+        }
+      });
+      if (!response) throw new Error('Failed to book meeting room')
+    } catch (err: any) {
+      error.value = err.message || 'Failed to book meeting room';
+    }
+  }
+
+  const deleteBookedMeetingRoom = async (meetingId: number) => {
+    try {
+      const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       });
       if (!response) throw new Error('Failed to book meeting room')
@@ -118,6 +134,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
     error,
     fetchBookedMeeting,
     bookMeetingRoom,
-    editBookedMeetingRoom
+    editBookedMeetingRoom,
+    deleteBookedMeetingRoom
   };
 });

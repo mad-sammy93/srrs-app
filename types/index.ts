@@ -1,4 +1,5 @@
-export interface RoomItem {
+//ROOM
+export interface RoomData { //while adding room
   id: number
   agenda: string
   meetingDate: string
@@ -14,13 +15,37 @@ export interface RoomItem {
   paxCount: number
 }
 
-export interface UserItem {
+export interface Room { //while fetching room items
+  id: number;
+  roomName: string;
+  pax: number;
+  hexColor: string;
+}
+export interface FetchRoomResponse {
+  status: number;
+  data: {
+    list: Room[];
+  };
+  message: string;
+}
+
+//USER
+export interface User {
  id: number;
  email: string;
  fullName: string;
  userStatusId: number;
 }
-export interface MeetingItem {
+export interface FetchUserResponse {
+  status: number
+  data: {
+    list: User[]
+  }
+  message: string
+}
+
+//MEETING
+export interface Meeting {
   id: number;
   agenda: string;
   meetingDate: string;
@@ -37,7 +62,7 @@ export interface MeetingItem {
 }
 export interface FetchMeetingResponse {
   status: number;
-  data: { list: MeetingItem[] };
+  data: { list: Meeting[] };
   message: string;
 }
 

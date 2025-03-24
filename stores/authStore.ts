@@ -25,7 +25,7 @@ interface RefreshResponse {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const userName = ref<User | null>(null)
+  const myDetails = ref<User | null>(null)
   const token = ref<string | null>(null)
   const refreshToken = ref<string | null>(null);
   const showOtpScreen = ref(false);
@@ -39,19 +39,21 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
-  const setUsernameFromToken = (jwtToken: string) => {
+  const setUserDetailsFromToken = (jwtToken: string) => {
     try {
       const decodedToken = JSON.parse(atob(jwtToken.split('.')[1]));
-      userName.value = { id: decodedToken.id, fullName: decodedToken.fullName, email: decodedToken.email };
+      myDetails.value = { id: decodedToken.id, fullName: decodedToken.fullName, email: decodedToken.email };
     } catch (error) {
       console.error('Error decoding token:', error);
     }
   };
 
   const setTokens = (newAccessToken: string) => {
+    console.log('[SET TOKEN]');
+
     token.value = newAccessToken
     localStorage.setItem('token', newAccessToken)
-    setUsernameFromToken(newAccessToken);
+    setUserDetailsFromToken(newAccessToken);
   };
 
   const clearTokens = () => {
@@ -100,7 +102,9 @@ export const useAuthStore = defineStore('auth', () => {
         credentials: 'include',
       });
       if (response?.data.accessToken) {
-        token.value = response.data.accessToken;
+        // token.value = response.data.accessToken;
+        setTokens(response.data.accessToken)
+
         return true;
       }
       return false;
@@ -176,7 +180,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    userName,
+    myDetails,
     user,
     token,
     loading,
@@ -186,7 +190,7 @@ export const useAuthStore = defineStore('auth', () => {
     step,
     tempToken,
     refreshToken,
-    setUsernameFromToken,
+    setUserDetailsFromToken,
     refreshAuthToken,
     setTokens,
     clearTokens,

@@ -63,6 +63,20 @@ export const useMeetingStore = defineStore('meetingStore', () => {
     }
   };
 
+  const fetchBookedMeetingWithId = async (meetingId: number) => {
+    try {
+      const response = await $fetch<BookMeeting>(`/api/booked-meeting-rooms/${meetingId}`, {
+        method: 'GET',
+        headers: {
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
+        }
+      })
+      if (!response) throw new Error('Failed to fetch meeting room')
+      return { data: response, error: null }; // Return the response data and null error
+    } catch (err: any) {
+
+    }
+  }
 
   const bookMeetingRoom = async (formData: {
     agenda: string;
@@ -132,6 +146,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
     bookings,
     loading,
     error,
+    fetchBookedMeetingWithId,
     fetchBookedMeeting,
     bookMeetingRoom,
     editBookedMeetingRoom,

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useAuthStore } from './authStore';
-import type { Meeting, FetchMeetingResponse, BookMeeting, BookMeetingRoomResponse } from '@/types'
+import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeetingRoomFormData, AddBookingFormData, BookMeetingRoomResponse, FetchBookingWIthIdResponse } from '@/types'
 
 
 export const useMeetingStore = defineStore('meetingStore', () => {
@@ -12,16 +12,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   const error = ref<string | null>(null);
 
   // Fetch meeting data with dynamic parameters
-  const fetchBookedMeeting = async (params: {
-    roomId?: number;
-    fromDate?: string;
-    toDate?: string;
-    status?: string;
-    searchTerm?: string;
-    myBookingsOnly?: boolean;
-    pageNo?: number;
-    limit?: number;
-  }) => {
+  const fetchBookedMeeting = async (params: FetchMeetingParams) => {
     loading.value = true;
     error.value = null;
 
@@ -65,33 +56,26 @@ export const useMeetingStore = defineStore('meetingStore', () => {
 
   const fetchBookedMeetingWithId = async (meetingId: number) => {
     try {
-      const response = await $fetch<BookMeeting>(`/api/booked-meeting-rooms/${meetingId}`, {
+      loading.value = true;
+      const { data: meeting } = await $fetch<FetchBookingWIthIdResponse>(`/api/booked-meeting-rooms/${meetingId}`, {
         method: 'GET',
         headers: {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       })
-      if (!response) throw new Error('Failed to fetch meeting room')
-      return { data: response, error: null }; // Return the response data and null error
+      if (meeting) {
+        console.log('Meeting:', meeting);
+        return { data: meeting, error: null };
+      }
+
+      if (!meeting) throw new Error('Failed to fetch meeting room')
+      return { data: meeting, error: null }; // Return the response data and null error
     } catch (err: any) {
 
     }
   }
 
-  const bookMeetingRoom = async (formData: {
-    agenda: string;
-    meetingDate: string;
-    meetingEndDate?: string;
-    startTime: string;
-    endTime: string;
-    roomId: number;
-    userId: number;
-    memberIds: number[];
-    isRecurring: boolean;
-    recurrencePatternId?: number | null;
-    frequency?: number | null;
-    weekdayId?: number | null;
-  }) => {
+  const bookMeetingRoom = async (formData: AddBookingFormData) => {
     try {
       const cleanData = Object.fromEntries(
         Object.entries(formData).filter(([_, value]) =>
@@ -114,14 +98,20 @@ export const useMeetingStore = defineStore('meetingStore', () => {
     }
   }
 
-  const editBookedMeetingRoom = async (meetingId: number) => {
+  const editBookedMeetingRoom = async (meetingId: number, formData: EditBookedMeetingRoomFormData) => {
     try {
       const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}`, {
         method: 'PATCH',
         headers: {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
-        }
+        },
+        body: formData
       });
+      if (response) {
+
+        console.log('formData Meeting store', formData);
+        return { data: response, error: null }; // Return the response data and null error
+      }
       if (!response) throw new Error('Failed to book meeting room')
     } catch (err: any) {
       error.value = err.message || 'Failed to book meeting room';

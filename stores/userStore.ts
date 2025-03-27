@@ -27,9 +27,7 @@ export const useUserStore = defineStore('users', () => {
             Authorization: token ? `Bearer ${token}` : '' // Add token if available
           }
         }
-      ) // Updated endpoint
-      console.log('[FETCH USERS]', response.data.list);
-
+      ) 
       usersList.value = response.data.list
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error'
@@ -37,6 +35,5 @@ export const useUserStore = defineStore('users', () => {
       loading.value = false
     }
   }
-
   return { usersList, loading, error, fetchUsers }
 })

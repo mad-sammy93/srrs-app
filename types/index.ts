@@ -84,3 +84,99 @@ export interface BookMeetingRoomResponse {
   data: BookMeeting;
   message: string;
 }
+
+export interface FetchBookingWIthIdResponse {
+  status: number;
+  message: string;
+  data: {
+    id: number;
+    agenda: string;
+    meetingDate: string;
+    meetingEndDate: string;
+    startDateTime: string;
+    endDateTime: string;
+    frequency: number;
+    parentId: number;
+    createdAt: string;
+    room: {
+      id: number;
+      roomName: string;
+      pax: number;
+      hexColor: string;
+    };
+    user: {
+      id: number;
+      fullName: string;
+      email: string;
+    };
+    recurrencePattern: {
+      id: number;
+      recurrencePattern: string;
+    };
+    weekday: {
+      id: number;
+      weekday: string;
+    };
+    isRecurring: boolean;
+    members: {
+      id: number;
+      fullName: string;
+      email: string;
+    }[];
+  };
+}
+
+export interface FormData {
+  agenda: string;
+  meetingDate: string;
+  meetingEndDate: string;
+  startTime: string;
+  endTime: string;
+  roomId: number;
+  userId: number | undefined;
+  memberIds: number[];
+  isRecurring: boolean;
+  recurrencePatternId: number | undefined;
+  frequency: number | undefined;
+  weekdayId: number | undefined;
+}
+
+export interface EditBookedMeetingRoomFormData {
+  agenda: string;
+  meetingDate: string;
+  meetingEndDate?: string;
+  startTime: string;
+  endTime: string;
+  roomId: number;
+  memberIds: number[];
+  isRecurring: boolean;
+  recurrencePatternId?: number | null;
+  frequency?: number | null;
+  weekdayId?: number | null;
+}
+
+export interface FetchMeetingParams {
+  roomId?: number;
+  fromDate?: string;
+  toDate?: string;
+  status?: string;
+  searchTerm?: string;
+  myBookingsOnly?: boolean;
+  pageNo?: number;
+  limit?: number;
+}
+
+export interface AddBookingFormData {
+  agenda: string;
+  meetingDate: string;
+  meetingEndDate?: string;
+  startTime: string;
+  endTime: string;
+  roomId: number;
+  userId: number;
+  memberIds: number[];
+  isRecurring: boolean;
+  recurrencePatternId?: number | null;
+  frequency?: number | null;
+  weekdayId?: number | null;
+}

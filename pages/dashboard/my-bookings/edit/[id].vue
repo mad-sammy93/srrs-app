@@ -1,6 +1,6 @@
 <template>
   <div class="p-8">
-    {{ form }}
+    <!-- {{ form }} -->
     <div class="mb-4 text-gray-500">
       <a
         href="#"
@@ -34,7 +34,7 @@
               :class="[
                 'room-btn',
                 form.roomId === room.id ? 'selected-room' : '',
-                getRoomClass(room),
+                getRoomClass(room.roomName),
               ]"
               :style="{ backgroundColor: room.hexColor }"
               @click.prevent="form.roomId = room.id"
@@ -163,6 +163,40 @@
           {{ loading ? "Updating..." : "Update Booking" }}
         </button>
       </form>
+      <!-- Confirmation Modal -->
+      <div
+        v-if="confirmModalVisible"
+        class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center"
+      >
+        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+          <h3 class="text-lg font-semibold mb-4">Apply Changes</h3>
+          <p class="text-gray-600 mb-4">Do you want to apply the changes to:</p>
+
+          <div class="flex flex-col gap-3" v-if="form.isRecurring">
+            <button
+              @click="confirmEdit('SELECTED')"
+              class="btn-secondary"
+            >
+              Only this meeting
+            </button>
+
+            <button
+              @click="confirmEdit('SELECTED_AND_UPCOMING')"
+              class="btn-primary"
+            >
+              This and upcoming meetings
+            </button>
+          </div>
+
+          <button v-if="!form.isRecurring" @click="confirmEdit('SELECTED')" class="mt-4 btn-primary">Confirm</button>
+          <button
+            @click="confirmModalVisible = false"
+            class="mt-4 text-gray-500 hover:text-gray-700"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -178,6 +212,9 @@ import type { FormData, EditBookedMeetingRoomFormData } from "@/types";
 const roomStore = useRoomStore();
 const userStore = useUserStore();
 const meetingStore = useMeetingStore();
+
+const confirmModalVisible = ref(false);
+const selectedOption = ref("");
 
 const rooms = storeToRefs(roomStore).roomList;
 const user = storeToRefs(userStore).usersList;
@@ -196,6 +233,7 @@ const route = useRoute();
 const meetingId = Number(route.params.id);
 
 const form = ref<FormData>({
+  id: 0,
   agenda: "",
   meetingDate: "",
   meetingEndDate: "",
@@ -205,9 +243,10 @@ const form = ref<FormData>({
   userId: 0,
   memberIds: [],
   isRecurring: false,
-  recurrencePatternId: 0,
-  frequency: 0,
-  weekdayId: 0,
+  option: "SELECTED",
+  recurrencePatternId: undefined,
+  frequency: undefined,
+  weekdayId: undefined,
 });
 
 onMounted(async () => {
@@ -224,22 +263,20 @@ onMounted(async () => {
     if (meeting) {
       // console.log('Fetching meeting:', meeting.data);
       form.value = {
+        id: meetingId,
         agenda: meeting.data.agenda,
         meetingDate: meeting.data.meetingDate,
         meetingEndDate: meeting.data.meetingEndDate,
-        startTime: convertTo24HourFormat(
-          meeting.data.startDateTime.split("T")[1].split("+")[0].split(".")[0]
-        ),
-        endTime: convertTo24HourFormat(
-          meeting.data.endDateTime.split("T")[1].split("+")[0].split(".")[0]
-        ),
+        startTime: convertTo24HourFormat(meeting.data.startDateTime),
+        endTime: convertTo24HourFormat(meeting.data.endDateTime),
         roomId: meeting.data.room.id,
-        userId: meeting.data.user?.id ?? 0, // Add null check and default value
+        userId: meeting.data.user?.id , // Add null check and default value
         memberIds: meeting.data.members.map((member: any) => member.id),
         isRecurring: meeting.data.isRecurring,
-        recurrencePatternId: meeting.data.recurrencePattern?.id ?? 0, // Add null check and default value
-        frequency: meeting.data.frequency ?? 0, // Add null check and default value
-        weekdayId: meeting.data.weekday?.id ?? 0, // Add null check and default value
+        option:  (form.value.isRecurring) ? 'SELECTED' : 'SELECTED_AND_UPCOMING',
+        recurrencePatternId: meeting.data.recurrencePattern?.id , // Add null check and default value
+        frequency: meeting.data.frequency , // Add null check and default value
+        weekdayId: meeting.data.weekday?.id , // Add null check and default value
       };
     }
   } catch (error) {
@@ -265,28 +302,36 @@ const recurrencePatterns = ref([
   },
 ]);
 
-// "startTime must be a valid representation of military time in the format HH:MM",
-// "endTime must be a valid representation of military time in the format HH:MM"
-//convert from 2025-04-18T09:59:00.000Z to 09:59
 const convertTo24HourFormat = (time: string) => {
-  const [hours, minutes] = time.split(":");
-  return `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
+  const date = new Date(time);
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
 };
 
-const submitEdit = async () => {
+const submitEdit = () => {
+  confirmModalVisible.value = true;
+};
+
+const confirmEdit = async (option: string) => {
+  selectedOption.value = option;
+  confirmModalVisible.value = false;
   loading.value = true;
+
+
+      console.log('[confirmEdit]form.value:', form.value);
+      
   try {
-    // "startTime must be a valid representation of military time in the format HH:MM",
-    // "endTime must be a valid representation of military time in the format HH:MM"
     const response = await meetingStore.editBookedMeetingRoom(meetingId, {
       ...form.value,
-      meetingEndDate: form.value.isRecurring
-        ? form.value.meetingEndDate
-        : form.value.meetingDate,
+      option: selectedOption.value, // Send selected option to API
+      meetingEndDate: form.value.isRecurring ? form.value.meetingEndDate : form.value.meetingDate,
     });
-    console.log("Meeting updated:", response);
 
-    alert("Meeting updated successfully!");
+    if (response) {
+      console.log("Meeting updated successfully:", response);
+      alert("Meeting updated successfully!");
+    }
   } catch (error) {
     console.error("Error updating meeting:", error);
     alert("Failed to update meeting.");
@@ -295,10 +340,26 @@ const submitEdit = async () => {
   }
 };
 
-const getRoomClass = (room: any) => {
-  if (room.isAvailable === false) return "room-unavailable";
-  const colors = ["room-a", "room-b", "room-c", "room-d", "room-e"];
-  return colors[room.id % colors.length];
+const getRoomClass = (roomName: any) => {
+  // if (room.isAvailable === false) return "room-unavailable";
+  const colors = [
+    {
+      id: 1,
+      roomName: "Diversity",
+      className: "diversity",
+    },
+    {
+      id: 2,
+      roomName: "Excellence",
+      className: "excellence",
+    },
+    {
+      id: 3,
+      roomName: "Positive_Attitude",
+      className: "positive-attitude",
+    },
+  ];
+  return colors.find((color) => color.roomName === roomName)?.className; //match name with roomName and return class name
 };
 </script>
 
@@ -331,5 +392,21 @@ const getRoomClass = (room: any) => {
 }
 .selected-room {
   border: 2px solid #007bff;
+}
+.diversity {
+  background-color: #cce5ff;
+  border-left-width: 4px;
+  border-color: #007bff;
+}
+.excellence {
+  background-color: #0000cc;
+  color: white;
+  border-left-width: 4px;
+  border-color: #007bff;
+}
+.positive-attitude {
+  background-color: #f8d7da;
+  border-left-width: 4px;
+  border-color: #007bff;
 }
 </style>

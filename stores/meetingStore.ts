@@ -39,7 +39,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       });
       if (response) {
         const data = response.data.list
-        console.log(data);
+        // console.log(data);
 
         bookings.value = data
       }
@@ -64,7 +64,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
         }
       })
       if (meeting) {
-        console.log('Meeting:', meeting);
+        console.log('fetchBookedMeetingWithId:', meeting);
         return { data: meeting, error: null };
       }
 
@@ -99,8 +99,10 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   }
 
   const editBookedMeetingRoom = async (meetingId: number, formData: EditBookedMeetingRoomFormData) => {
+    console.log('meetingId store', meetingId);
+
     try {
-      const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}`, {
+      const response = await $fetch<EditBookedMeetingRoomFormData>(`/api/booked-meeting-rooms/${meetingId}`, {
         method: 'PATCH',
         headers: {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
@@ -109,7 +111,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       });
       if (response) {
 
-        console.log('formData Meeting store', formData);
+        console.log('formData Meeting store', response);
         return { data: response, error: null }; // Return the response data and null error
       }
       if (!response) throw new Error('Failed to book meeting room')
@@ -118,9 +120,9 @@ export const useMeetingStore = defineStore('meetingStore', () => {
     }
   }
 
-  const deleteBookedMeetingRoom = async (meetingId: number) => {
+  const deleteBookedMeetingRoom = async (meetingId: number, option: string) => {
     try {
-      const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}`, {
+      const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}?option=${option}`, {
         method: 'DELETE',
         headers: {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available

@@ -127,6 +127,7 @@ export interface FetchBookingWIthIdResponse {
 }
 
 export interface FormData {
+  id?: number;
   agenda: string;
   meetingDate: string;
   meetingEndDate: string;
@@ -136,9 +137,11 @@ export interface FormData {
   userId: number | undefined;
   memberIds: number[];
   isRecurring: boolean;
+  option?: string;
   recurrencePatternId: number | undefined;
   frequency: number | undefined;
   weekdayId: number | undefined;
+  weekday?: string
 }
 
 export interface EditBookedMeetingRoomFormData {
@@ -150,6 +153,7 @@ export interface EditBookedMeetingRoomFormData {
   roomId: number;
   memberIds: number[];
   isRecurring: boolean;
+  option: string;
   recurrencePatternId?: number | null;
   frequency?: number | null;
   weekdayId?: number | null;

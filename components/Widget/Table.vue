@@ -2,7 +2,12 @@
   <div>
     <div class="overflow-x-auto min-w-[1440px]">
       <div class="flex justify-between items-center mb-4">
-        <h3 v-if="title" class="text-2xl font-semibold mb-4">{{ title }}</h3>
+        <h3
+          v-if="title"
+          class="text-2xl font-semibold mb-4"
+        >
+          {{ title }}
+        </h3>
         <div class="filter">
           <input
             type="text"
@@ -43,8 +48,11 @@
             <td class="p-3 border">{{ meeting.id }}</td>
             <td class="p-3 border">{{ meeting.room.roomName }}</td>
             <td class="p-3 border">{{ meeting.startDateTime.slice(0, 10) }}</td>
-            <td class="p-3 border">{{ meeting.startDateTime.slice(11, 16) }}</td>
-            <td class="p-3 border">{{ meeting.endDateTime.slice(11, 16) }}</td>
+            <td class="p-3 border">
+              {{ new Date(meeting.startDateTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) }}
+            </td>
+            <td class="p-3 border">  {{ new Date(meeting.endDateTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) }}
+            </td>
             <td class="p-3 border">
               {{ meeting.createdAt.slice(0, 10) }} ,
               {{ meeting.createdAt.slice(11, 16) }}
@@ -52,16 +60,16 @@
             <td class="p-3 border">{{ meeting.paxCount }}</td>
             <td class="p-3 border">{{ meeting.agenda }}</td>
             <td class="p-3 border">
-            <span class="flex justify-center items-center">
-              <span
-                class="flex w-2 h-2 mr-4  rounded-full"
-                :class="{
-                  'bg-green-600': meetingStatus[index] === 'Upcoming',
-                  'bg-blue-600': meetingStatus[index] === 'In Progress',
-                  'bg-gray-600': meetingStatus[index] === 'Completed',
-                }"
-                aria-hidden="true"
-                tooltip="Online"
+              <span class="flex justify-center items-center">
+                <span
+                  class="flex w-2 h-2 mr-4 rounded-full"
+                  :class="{
+                    'bg-green-600': meetingStatus[index] === 'Upcoming',
+                    'bg-blue-600': meetingStatus[index] === 'In Progress',
+                    'bg-gray-600': meetingStatus[index] === 'Completed',
+                  }"
+                  aria-hidden="true"
+                  tooltip="Online"
                 ></span>
                 {{ meetingStatus[index] }}
               </span>
@@ -84,7 +92,7 @@
               </button>
               <button
                 class="text-red-600 hover:underline"
-                @click="$emit('cancel', meeting)"
+                @click="confirmDelete(meeting)"
               >
                 <UIAtomsIconsDeleteBooking />
               </button>
@@ -92,6 +100,55 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div
+      v-if="showDeleteModal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm">
+        <h2 class="text-lg font-semibold mb-4">Confirm Delete</h2>
+        <p class="mb-4">Are you sure you want to delete this meeting?</p>
+
+        <!-- Delete Options -->
+        <div class="mb-4">
+          <label class="flex items-center mb-2">
+            <input
+              type="radio"
+              v-model="deleteOption"
+              value="SELECTED"
+              class="mr-2"
+              checked
+            />
+            Delete only this meeting
+          </label>
+          <label class="flex items-center">
+            <input
+              type="radio"
+              v-model="deleteOption"
+              value="SELECTED_AND_UPCOMING"
+              class="mr-2"
+            />
+            Delete this and all upcoming meetings
+          </label>
+        </div>
+
+        <div class="flex justify-end mt-4">
+          <button
+            class="px-4 py-2 mr-2 bg-gray-300 rounded-md"
+            @click="showDeleteModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 bg-red-600 text-white rounded-md"
+            @click="deleteMeeting"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Pagination Controls -->
@@ -121,6 +178,28 @@
 import { computed, ref, watch } from "vue";
 import type { Meeting } from "@/types";
 
+const showDeleteModal = ref(false);
+const selectedMeeting = ref<Meeting | null>(null);
+const deleteOption = ref<"SELECTED" | "SELECTED_AND_UPCOMING">("SELECTED");
+
+const confirmDelete = (meeting: Meeting) => {
+  selectedMeeting.value = meeting;
+  showDeleteModal.value = true;
+  deleteOption.value = "SELECTED";
+};
+const deleteMeeting = () => {
+  if (!selectedMeeting.value) return;
+
+  if (deleteOption.value === "SELECTED") {
+    // add option in selected meeting object
+    emit("cancel", selectedMeeting.value, deleteOption.value);
+  } else if (deleteOption.value === "SELECTED_AND_UPCOMING") {
+    emit("cancel", selectedMeeting.value, deleteOption.value);
+  }
+  showDeleteModal.value = false;
+  selectedMeeting.value = null;
+};
+
 const props = defineProps({
   meetings: {
     type: Array as () => Meeting[],
@@ -131,18 +210,26 @@ const props = defineProps({
   },
   filter: {
     type: String,
-    default: '',
+    default: "",
   },
 });
 
-const emit = defineEmits(["edit", "cancel", "searchMeetings", "update:filter", "fetchPageData"]);
+const emit = defineEmits([
+  "edit",
+  "cancel",
+  "searchMeetings",
+  "update:filter",
+  "fetchPageData",
+]);
 
 // Pagination settings
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
 // Computed: Total pages
-const totalPages = computed(() => Math.ceil(props.meetings.length / itemsPerPage));
+const totalPages = computed(() =>
+  Math.ceil(props.meetings.length / itemsPerPage)
+);
 
 // Computed: Meetings for the current page
 const paginatedMeetings = computed(() => {
@@ -154,7 +241,7 @@ const paginatedMeetings = computed(() => {
 const updateFilter = (event: Event) => {
   const target = event.target as HTMLInputElement | null;
   if (target) {
-    emit('update:filter', target.value);
+    emit("update:filter", target.value);
   }
 };
 

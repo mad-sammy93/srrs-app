@@ -3,7 +3,7 @@
     <nav class="bg-sky-500 border-gray-200 dark:bg-sky-500 relative">
       <div class="flex flex-wrap items-center justify-between mx-auto px-4">
         <NuxtLink
-          to="/dashboard"
+          to="/"
           class="flex items-center space-x-3 rtl:space-x-reverse"
         >
           <UIAtomsLogo />

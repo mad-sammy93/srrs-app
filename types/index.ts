@@ -31,10 +31,10 @@ export interface FetchRoomResponse {
 
 //USER
 export interface User {
- id: number;
- email: string;
- fullName: string;
- userStatusId: number;
+  id: number;
+  email: string;
+  fullName: string;
+  userStatusId: number;
 }
 export interface FetchUserResponse {
   status: number

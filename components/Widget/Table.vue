@@ -49,9 +49,20 @@
             <td class="p-3 border">{{ meeting.room.roomName }}</td>
             <td class="p-3 border">{{ meeting.startDateTime.slice(0, 10) }}</td>
             <td class="p-3 border">
-              {{ new Date(meeting.startDateTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) }}
+              {{
+                new Date(meeting.startDateTime).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              }}
             </td>
-            <td class="p-3 border">  {{ new Date(meeting.endDateTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) }}
+            <td class="p-3 border">
+              {{
+                new Date(meeting.endDateTime).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              }}
             </td>
             <td class="p-3 border">
               {{ meeting.createdAt.slice(0, 10) }} ,

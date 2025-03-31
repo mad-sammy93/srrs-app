@@ -13,26 +13,6 @@
       :eventSettings="eventSettings"
       :eventRendered="eventRendered"
     >
-      <!-- <e-views>
-        <e-view option="Day"></e-view>
-        <e-view option="Week"></e-view>
-        <e-view option="WorkWeek"></e-view>
-        <e-view option="Month"></e-view>
-        <e-view option="Agenda"></e-view>
-      </e-views> -->
-      <!-- <e-resources>
-       <e-resource
-          :field="resources.OwnerId"
-          :title="Owner"
-          :name="Owners"
-          :dataSource="ownerDataSource"
-          :textField="OwnerText"
-          :idField="id"
-          :colorField="OwnerColor"
-        >
-        </e-resource>
-      </e-resources> -->
-      
     </ejs-schedule>
   </div>
 </template>
@@ -49,25 +29,32 @@ import {
   Month,
   Agenda,
 } from "@syncfusion/ej2-vue-schedule";
-import type {EventRenderedArgs} from '@syncfusion/ej2-schedule';
+import type { EventRenderedArgs } from "@syncfusion/ej2-schedule";
 import type { Meeting } from "@/types";
 import { ref, watch, provide, toRaw } from "vue";
-import { createElement } from '@syncfusion/ej2-base';
+import { createElement } from "@syncfusion/ej2-base";
 
-import type{ RenderCellEventArgs } from '@syncfusion/ej2-schedule';
+// ✅ Provide Syncfusion Modules
+provide("schedule", [Day, Week, WorkWeek, Month, Agenda]);
+
+// ✅ Selected Date for Scheduler
+const selectedDate = ref(new Date());
+const currentDate = ref(new Date());
+const viewModes = ref(["Day", "Week", "Month"]);
+
+import type { RenderCellEventArgs } from "@syncfusion/ej2-schedule";
 // ✅ Define Props
 const meetingProps = defineProps({
   meetings: Array,
   userData: Object,
-
 });
 
 const onRenderCell = (args: RenderCellEventArgs) => {
   if (args.elementType == "currentDay") {
     let ele: any = createElement("div", {
       className: "e-current-day",
-    //   styles: "border: 1px solid red;background: red; height  : 100%;",
-    //   className: "templatewrap",
+      //   styles: "border: 1px solid red;background: red; height  : 100%;",
+      //   className: "templatewrap",
     });
     args.element.appendChild(ele);
   }
@@ -75,36 +62,35 @@ const onRenderCell = (args: RenderCellEventArgs) => {
     let weekEnds: number[] = [0, 6];
     if (args.date && weekEnds.indexOf(args.date.getDay()) >= 0) {
       let ele: any = createElement("div", {
-        styles: "background: #2196f3",//blue
+        styles: "background: #2196f3", //blue
         className: "templatewrap",
       });
       args.element.appendChild(ele);
     }
   }
   if (args.elementType == "workCells" || args.elementType == "monthCells") {
-        // To change the color of weekend columns in week view
-        if (args.date) {
-            if (args.date.getDay() === 6) {
-              (args.element as HTMLElement).style.background = '#FFE7E7';
-            }
-            if (args.date.getDay() === 0) {
-              (args.element as HTMLElement).style.background = '#FFE7E7';
-            }
-        }
-        
+    // To change the color of weekend columns in week view
+    if (args.date) {
+      if (args.date.getDay() === 6) {
+        (args.element as HTMLElement).style.background = "#FFE7E7";
+      }
+      if (args.date.getDay() === 0) {
+        (args.element as HTMLElement).style.background = "#FFE7E7";
+      }
     }
+  }
 };
 
 // ✅ Reactive Data for Meetings (initialized to avoid early access)
 const meetingData = ref(
   Array.isArray(meetingProps.meetings) ? meetingProps.meetings.map(toRaw) : []
 );
-let toolTipTemplate: string = '<div class="tooltip-wrap">' +
-    '<div class="content-area">${subject}' +
-    '${if(City !== null && City !== undefined)}<div class="city">${City}</div>${/if}' +
-    '<div class="time">From : ${startTime.toLocaleString()} </div>' +
-    '<div class="time">To   : ${endTime.toLocaleString()} </div></div></div>';
-    
+let toolTipTemplate: string =
+  '<div class="tooltip-wrap">' +
+  '<div class="content-area">${subject}' +
+  '${if(City !== null && City !== undefined)}<div class="city">${City}</div>${/if}' +
+  '<div class="time">From : ${startTime.toLocaleString()} </div>' +
+  '<div class="time">To   : ${endTime.toLocaleString()} </div></div></div>';
 
 // ✅ Initialize Event Settings Before Using It
 const eventSettings = ref({
@@ -154,41 +140,13 @@ watch(
         color: meeting.room?.hexColor || "#cccccc", // Ensure a valid color
       }));
     }
-    eventSettings.value = { ...eventSettings.value, dataSource: [...meetingData.value] };
+    eventSettings.value = {
+      ...eventSettings.value,
+      dataSource: [...meetingData.value],
+    };
   },
   { deep: true, immediate: true }
 );
-
-interface Owner {
-  Id: number;
-  OwnerText: string;
-  OwnerColor: string;
-}
-// ✅ Ensure updates on user data changes (owners/rooms)
-// const ownerDataSource = ref<Owner[]>([]);
-
-// watch(
-//   () => meetingProps.userData,
-//   (newUserData) => {
-//     if (newUserData && Array.isArray(newUserData.usersList)) {
-//       ownerDataSource.value = newUserData.usersList.map(toRaw);
-//     } else {
-//       ownerDataSource.value = []; // Reset if invalid
-//     }
-//   },
-//   { deep: true, immediate: true }
-// );
-
-// ✅ Provide Syncfusion Modules
-provide("schedule", [Day, Week, WorkWeek, Month, Agenda]);
-
-// ✅ Selected Date for Scheduler
-const selectedDate = ref(new Date());
-const currentDate = ref(new Date());
-
-// currentDate: new Date(2025, 1, 15),
-
-const viewModes = ref(["Day", "Week", "Month"]);
 </script>
 <style>
 @import "@syncfusion/ej2-base/styles/material.css";
@@ -231,15 +189,15 @@ const viewModes = ref(["Day", "Week", "Month"]);
 /* Selected Day Border */
 .e-current-day {
   /* border: 2px solid #007bff !important; */
-  color: #437DD6 !important;
+  color: #437dd6 !important;
 }
 /* .schedule-cell-customization.e-schedule .e-month-view .e-work-cells:not(.e-work-days) {
     background-color: #f08080;
 } */
 /* Event Colors */
 .e-appointment[room="A"] {
-    background-color: #cce5ff;
-    color: #004085;
+  background-color: #cce5ff;
+  color: #004085;
 }
 
 /* .e-appointment[room="B"] {

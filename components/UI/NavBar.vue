@@ -87,8 +87,7 @@
                 </button>
               </div>
               <div
-                :class="{ 'hidden': !openDropdown }"
-
+                :class="{ hidden: !openDropdown }"
                 class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600"
                 id="dropdown-user"
               >
@@ -149,7 +148,7 @@
               </div>
             </div>
           </div>
-          
+
           <NuxtLink
             to="/auth/logout"
             class="text-sm font-medium text-gray-900 dark:text-white hover:underline"
@@ -170,7 +169,7 @@ let open = ref(false);
 
 const refresh = () => {
   authStore.refreshAuthToken();
-}
+};
 </script>
 
 <style scoped></style>

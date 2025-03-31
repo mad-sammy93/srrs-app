@@ -27,7 +27,7 @@ export const useUserStore = defineStore('users', () => {
             Authorization: token ? `Bearer ${token}` : '' // Add token if available
           }
         }
-      ) 
+      )
       usersList.value = response.data.list
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error'

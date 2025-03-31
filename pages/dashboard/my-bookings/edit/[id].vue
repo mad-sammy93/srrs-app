@@ -1,6 +1,5 @@
 <template>
   <div class="p-8">
-    <!-- {{ form }} -->
     <div class="mb-4 text-gray-500">
       <a
         href="#"
@@ -172,7 +171,10 @@
           <h3 class="text-lg font-semibold mb-4">Apply Changes</h3>
           <p class="text-gray-600 mb-4">Do you want to apply the changes to:</p>
 
-          <div class="flex flex-col gap-3" v-if="form.isRecurring">
+          <div
+            class="flex flex-col gap-3"
+            v-if="form.isRecurring"
+          >
             <button
               @click="confirmEdit('SELECTED')"
               class="btn-secondary"
@@ -188,7 +190,13 @@
             </button>
           </div>
 
-          <button v-if="!form.isRecurring" @click="confirmEdit('SELECTED')" class="mt-4 btn-primary">Confirm</button>
+          <button
+            v-if="!form.isRecurring"
+            @click="confirmEdit('SELECTED')"
+            class="mt-4 btn-primary"
+          >
+            Confirm
+          </button>
           <button
             @click="confirmModalVisible = false"
             class="mt-4 text-gray-500 hover:text-gray-700"
@@ -270,13 +278,13 @@ onMounted(async () => {
         startTime: convertTo24HourFormat(meeting.data.startDateTime),
         endTime: convertTo24HourFormat(meeting.data.endDateTime),
         roomId: meeting.data.room.id,
-        userId: meeting.data.user?.id , // Add null check and default value
+        userId: meeting.data.user?.id, // Add null check and default value
         memberIds: meeting.data.members.map((member: any) => member.id),
         isRecurring: meeting.data.isRecurring,
-        option:  (form.value.isRecurring) ? 'SELECTED' : 'SELECTED_AND_UPCOMING',
-        recurrencePatternId: meeting.data.recurrencePattern?.id , // Add null check and default value
-        frequency: meeting.data.frequency , // Add null check and default value
-        weekdayId: meeting.data.weekday?.id , // Add null check and default value
+        option: form.value.isRecurring ? "SELECTED" : "SELECTED_AND_UPCOMING",
+        recurrencePatternId: meeting.data.recurrencePattern?.id, // Add null check and default value
+        frequency: meeting.data.frequency, // Add null check and default value
+        weekdayId: meeting.data.weekday?.id, // Add null check and default value
       };
     }
   } catch (error) {
@@ -318,14 +326,15 @@ const confirmEdit = async (option: string) => {
   confirmModalVisible.value = false;
   loading.value = true;
 
+  console.log("[confirmEdit]form.value:", form.value);
 
-      console.log('[confirmEdit]form.value:', form.value);
-      
   try {
     const response = await meetingStore.editBookedMeetingRoom(meetingId, {
       ...form.value,
       option: selectedOption.value, // Send selected option to API
-      meetingEndDate: form.value.isRecurring ? form.value.meetingEndDate : form.value.meetingDate,
+      meetingEndDate: form.value.isRecurring
+        ? form.value.meetingEndDate
+        : form.value.meetingDate,
     });
 
     if (response) {

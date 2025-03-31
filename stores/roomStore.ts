@@ -17,7 +17,7 @@ export const useRoomStore = defineStore('room', () => {
       roomList.value = response.data.list
     } catch (err) {
       console.error('Error fetching rooms:', err)
-    } 
+    }
   }
   return { roomList, fetchRoomsData }
 })

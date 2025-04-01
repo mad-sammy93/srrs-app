@@ -2,6 +2,7 @@
   <div>
     <div class="overflow-x-auto min-w-[1440px]">
       <div class="flex justify-between items-center mb-4">
+        <!-- paginatedMeetings: {{ paginatedMeetings }} -->
         <h3
           v-if="title"
           class="text-2xl font-semibold mb-4"
@@ -24,10 +25,14 @@
           </button>
         </div>
       </div>
-      <table class="min-w-full bg-white border border-gray-300 text-gray-500">
+
+      <table
+        class="min-w-full bg-white border border-gray-300 text-gray-500"
+        v-if="!loading"
+      >
         <thead class="bg-white font-bold">
           <tr>
-            <th class="p-3 border">ID</th>
+            <!-- <th class="p-3 border">ID</th> -->
             <th class="p-3 border">Room Name</th>
             <th class="p-3 border">Date</th>
             <th class="p-3 border">Start Time</th>
@@ -45,7 +50,7 @@
             :key="index"
             class="hover:bg-gray-100 font-normal"
           >
-            <td class="p-3 border">{{ meeting.id }}</td>
+            <!-- <td class="p-3 border">{{ meeting.id }}</td> -->
             <td class="p-3 border">{{ meeting.room.roomName }}</td>
             <td class="p-3 border">{{ meeting.startDateTime.slice(0, 10) }}</td>
             <td class="p-3 border">
@@ -111,6 +116,61 @@
           </tr>
         </tbody>
       </table>
+      <table class="min-w-full bg-white border border-gray-300 text-gray-500" v-else>
+        <thead class="bg-white font-bold">
+          <tr>
+            <!-- <th class="p-3 border">ID</th> -->
+            <th class="p-3 border">Room Name</th>
+            <th class="p-3 border">Date</th>
+            <th class="p-3 border">Start Time</th>
+            <th class="p-3 border">End Time</th>
+            <th class="p-3 border">Booked Date & Time</th>
+            <th class="p-3 border">Pax</th>
+            <th class="p-3 border">Meeting Agenda</th>
+            <th class="p-3 border">Status</th>
+            <th class="p-3 border">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="n in 5"
+            :key="n"
+            class="animate-pulse"
+          >
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-10"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-24"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-20"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-16"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-16"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-24"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-10"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-32"></div>
+            </td>
+            <td class="p-3 border">
+              <div class="h-4 bg-gray-300 rounded w-16"></div>
+            </td>
+            <td class="p-3 border flex justify-center space-x-2">
+              <div class="h-4 bg-gray-300 rounded w-8"></div>
+              <div class="h-4 bg-gray-300 rounded w-8"></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Delete Confirmation Modal -->
@@ -118,7 +178,8 @@
       v-if="showDeleteModal"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center"
     >
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm">
+      <div class="fixed w-full h-full blur-md"></div>
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm z-0">
         <h2 class="text-lg font-semibold mb-4">Confirm Delete</h2>
         <p class="mb-4">Are you sure you want to delete this meeting?</p>
 
@@ -218,14 +279,28 @@ const props = defineProps({
   },
   title: {
     type: String,
+    required: true,
   },
   filter: {
     type: String,
     default: "",
   },
+  currentPage: {
+    type: Number,
+    required: true,
+  },
+  totalPages: {
+    type: Number,
+    required: true,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits([
+  "fetchPageData",
   "edit",
   "cancel",
   "searchMeetings",
@@ -234,20 +309,30 @@ const emit = defineEmits([
 ]);
 
 // Pagination settings
-const currentPage = ref(1);
-const itemsPerPage = 10;
+// const itemsPerPage = computed(() => props.itemsPerPage);
+const currentPage = computed(() => props.currentPage);
+const totalPages = computed(() => props.totalPages);
 
-// Computed: Total pages
-const totalPages = computed(() =>
-  Math.ceil(props.meetings.length / itemsPerPage)
+watch(
+  () => props.totalPages,
+  (newTotalPages, oldTotalPages) => {
+    console.log(
+      `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
+    );
+  }
+);
+
+watch(
+  () => props.currentPage,
+  (newCurrentPage, oldCurrentPage) => {
+    console.log(
+      `Current page changed from ${oldCurrentPage} to ${newCurrentPage}`
+    );
+  }
 );
 
 // Computed: Meetings for the current page
-const paginatedMeetings = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return props.meetings.slice(start, end);
-});
+const paginatedMeetings = computed(() => props.meetings);
 
 const updateFilter = (event: Event) => {
   const target = event.target as HTMLInputElement | null;
@@ -262,16 +347,14 @@ const searchMeetings = (searchTerm: string) => {
 
 // Pagination controls
 const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    emit("fetchPageData", currentPage.value);
+  if (props.currentPage > 1) {
+    emit("fetchPageData", props.currentPage - 1);
   }
 };
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    emit("fetchPageData", currentPage.value);
+  if (props.currentPage < props.totalPages) {
+    emit("fetchPageData", props.currentPage + 1);
   }
 };
 

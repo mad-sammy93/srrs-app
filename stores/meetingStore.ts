@@ -6,25 +6,18 @@ import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeeti
 
 export const useMeetingStore = defineStore('meetingStore', () => {
   const authStore = useAuthStore();
-  const token = authStore.token;
   const bookings = ref<Meeting[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const totalPages = ref<number>(0);
 
   // Fetch meeting data with dynamic parameters
   const fetchBookedMeeting = async (params: FetchMeetingParams) => {
     loading.value = true;
     error.value = null;
 
-    // Default values
-    const defaultParams = {
-      pageNo: 1,
-      limit: 10,
-    };
-
-    const queryParams = { ...defaultParams, ...params };
-
     try {
+      const queryParams = { ...params };
       const query = new URLSearchParams(
         Object.fromEntries(
           Object.entries(queryParams).map(([key, value]) => [key, String(value)])
@@ -32,23 +25,20 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       ).toString();
 
       const response = await $fetch<FetchMeetingResponse>(`/api/booked-meeting-rooms?${query}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
-        }
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : "",
+        },
       });
+
       if (response) {
-        const data = response.data.list
-        // console.log(data);
-
-        bookings.value = data
+        bookings.value = response.data.list;
+        totalPages.value = response.data.pagination.numberOfPages; // Store total pages from API
+      } else {
+        throw new Error("Failed to fetch meeting rooms");
       }
-
-      if (!response) throw new Error('Failed to fetch meeting rooms')
-
-      // bookings.value = data.value?.data?.list || [];
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch bookings';
+      error.value = err.message || "Failed to fetch bookings";
     } finally {
       loading.value = false;
     }
@@ -137,6 +127,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   return {
     bookings,
     loading,
+    totalPages,
     error,
     fetchBookedMeetingWithId,
     fetchBookedMeeting,

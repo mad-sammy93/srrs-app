@@ -62,7 +62,16 @@ export interface Meeting {
 }
 export interface FetchMeetingResponse {
   status: number;
-  data: { list: Meeting[] };
+  data: {
+    list: Meeting[],
+    pagination: {
+      limit: number;
+      pageNo: number;
+      totalItemCount: number;
+      numberOfPages: number;
+    }
+
+  };
   message: string;
 }
 

@@ -8,8 +8,11 @@
       >
       / <span>Edit Booking</span>
     </div>
+    <div class="p-4 mb-4">
+      <h1 class="text-4xl font-light mb-4">Edit Booking</h1>
+    </div>
     <div
-      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[100px] bg-white shadow-md rounded-lg"
+      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[50px] bg-white shadow-md rounded-lg"
     >
       <form @submit.prevent="submitEdit">
         <!-- Agenda -->
@@ -33,9 +36,10 @@
               :class="[
                 'room-btn',
                 form.roomId === room.id ? 'selected-room' : '',
-                getRoomClass(room.roomName),
+                getRoomClass(room),
               ]"
-              :style="{ backgroundColor: room.hexColor }"
+              class="room-btn text-white text-shadow-sm"
+              :style="`background: #${room.hexColor}95;border-left: 6px solid #${room.hexColor};border:2px solid #${room.hexColor};`"
               @click.prevent="form.roomId = room.id"
             >
               {{ room.roomName }} | Pax. {{ room.pax }}
@@ -162,6 +166,29 @@
           {{ loading ? "Updating..." : "Update Booking" }}
         </button>
       </form>
+      <div class="py-4 mb-5">
+        <div class="flex items-center mt-4 space-x-4">
+          <div
+            v-for="room in rooms"
+            :key="room.id"
+            class="flex flex-wrap items-center"
+          >
+            <span
+              class="w-6 h-6 bg-green-200 mr-2 rounded inline-block"
+              :style="`background-color: #${room.hexColor}`"
+            ></span
+            >{{ room.roomName }} Room
+          </div>
+          <div class="flex flex-wrap items-center">
+            <span class="w-6 h-6 mr-2 bg-gray-400 rounded inline-block"></span
+            >Not Available
+          </div>
+          <div class="flex flex-wrap items-center">
+            <span class="w-6 h-6 mr-2 bg-purple-200 rounded inline-block"></span
+            >Selected Room
+          </div>
+        </div>
+      </div>
       <!-- Confirmation Modal -->
       <div
         v-if="confirmModalVisible"
@@ -208,7 +235,6 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoomStore } from "@/stores/roomStore";
@@ -260,7 +286,7 @@ const form = ref<FormData>({
 onMounted(async () => {
   let params = {
     pageNo: 1,
-    limit: 100,
+    limit: 200,
   };
   await roomStore.fetchRoomsData();
   await userStore.fetchUsers(params);
@@ -370,6 +396,8 @@ const getRoomClass = (roomName: any) => {
   ];
   return colors.find((color) => color.roomName === roomName)?.className; //match name with roomName and return class name
 };
+
+useHead({ title: "Edit Booking" });
 </script>
 
 <style scoped>
@@ -400,22 +428,8 @@ const getRoomClass = (roomName: any) => {
   color: white;
 }
 .selected-room {
-  border: 2px solid #007bff;
-}
-.diversity {
-  background-color: #cce5ff;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
-.excellence {
-  background-color: #0000cc;
+  border-left-width: 4px !important;
   color: white;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
-.positive-attitude {
-  background-color: #f8d7da;
-  border-left-width: 4px;
-  border-color: #007bff;
+  text-shadow: rgba(0, 0, 0, 0.601) 2px 2px 10px;
 }
 </style>

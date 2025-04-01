@@ -29,7 +29,7 @@
             class="w-6 h-6 bg-green-200 mr-2 rounded inline-block"
             :style="`background-color: #${room.hexColor}`"
           ></span
-          >{{ room.roomName }}
+          >{{ room.roomName }} Room
         </div>
         <div class="flex flex-wrap items-center">
           <span class="w-6 h-6 mr-2 bg-gray-400 rounded inline-block"></span>Not

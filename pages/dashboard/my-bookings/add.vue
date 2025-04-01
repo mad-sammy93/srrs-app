@@ -8,15 +8,12 @@
       >
       / <span>Book Room</span>
     </div>
+    <div class="p-4 mb-4">
+      <h1 class="text-4xl font-light mb-4">Book Room</h1>
+    </div>
     <div
-      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[100px] bg-white shadow-md rounded-lg"
+      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[50px] bg-white shadow-md rounded-lg"
     >
-      <!-- <h2 class="text-xl font-semibold mb-4">Book a Meeting Room</h2> -->
-
-      <!-- {{ rooms }} -->
-
-      <!-- {{form}} -->
-      <!-- {{ user }} -->
       <form @submit.prevent="submitBooking">
         <!-- Agenda -->
         <div class="mb-4">
@@ -29,16 +26,8 @@
           />
         </div>
 
-        <!-- Select Room -->
         <div class="mb-4">
           <label class="block mb-2 text-gray-500">Select Room</label>
-          <!-- {{ rooms }} -->
-          <!-- <select v-model="form.roomId" class="input-field">
-          
-          <option v-for="room in rooms" :key="room.id" :value="room.id">
-            {{ room.roomName }}
-          </option>
-        </select> -->
           <div class="flex flex-wrap gap-2 mb-6">
             <button
               v-for="room in rooms"
@@ -48,14 +37,14 @@
                 form.roomId === room.id ? 'selected-room' : '',
                 getRoomClass(room),
               ]"
+              class="room-btn text-white text-shadow-sm"
+              :style="`background: #${room.hexColor}95;border-left: 6px solid #${room.hexColor};border:2px solid #${room.hexColor};`"
               @click.prevent="form.roomId = room.id"
             >
               {{ room.roomName }} | Pax. {{ room.pax }}
             </button>
           </div>
         </div>
-
-        <!-- Recurring Meeting Toggle -->
         <div class="mb-4 flex items-center">
           <input
             v-model="form.isRecurring"
@@ -64,8 +53,6 @@
           />
           <label class="font-normal text-gray-500">Is Recurring?</label>
         </div>
-
-        <!-- Recurrence Pattern (Only if Recurring) -->
         <div
           v-if="form.isRecurring"
           class="grid grid-cols-2 gap-4"
@@ -97,8 +84,6 @@
             />
           </div>
         </div>
-
-        <!-- Select Weekday (Only if Weekly Recurrence) -->
         <div
           v-if="form.isRecurring && form.recurrencePatternId == 2"
           class="mb-4"
@@ -117,8 +102,6 @@
             </option>
           </select>
         </div>
-
-        <!-- Meeting Date -->
         <div
           class="grid gap-4"
           :class="{
@@ -135,8 +118,6 @@
               required
             />
           </div>
-
-          <!-- End Date (Only if Recurring) -->
           <div
             v-if="form.isRecurring"
             class="mb-4"
@@ -169,20 +150,6 @@
             />
           </div>
         </div>
-
-        <!-- Start Time & End Time -->
-        <!-- <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block font-normal text-gray-500">Start Time</label>
-          <input v-model="form.startTime" type="time" class="input-field" required />
-        </div>
-        <div>
-          <label class="block font-normal text-gray-500">End Time</label>
-          <input v-model="form.endTime" type="time" class="input-field" required />
-        </div>
-      </div> -->
-
-        <!-- Select Members (Multiple Selection) -->
         <div class="mb-4">
           <label class="block font-normal text-gray-500">Select Members</label>
           <select
@@ -199,8 +166,6 @@
             </option>
           </select>
         </div>
-
-        <!-- Submit Button -->
         <button
           type="submit"
           class="btn-primary"
@@ -209,30 +174,38 @@
           {{ loading ? "Booking..." : "Book Meeting" }}
         </button>
       </form>
-
-      <!-- Success Message -->
       <p
         v-if="successMessage"
         class="text-green-600 mt-4"
       >
         {{ successMessage }}
       </p>
-
-      <div class="flex items-center mt-8 space-x-4">
-        <span class="w-6 h-6 bg-green-200 rounded inline-block"></span> Room A
-        <span class="w-6 h-6 bg-lime-200 rounded inline-block"></span> Room B
-        <span class="w-6 h-6 bg-yellow-200 rounded inline-block"></span> Room C
-        <span class="w-6 h-6 bg-pink-200 rounded inline-block"></span> Room D
-        <span class="w-6 h-6 bg-red-300 rounded inline-block"></span> Room E
-        <span class="w-6 h-6 bg-gray-400 rounded inline-block"></span> Not
-        Available
-        <span class="w-6 h-6 bg-purple-200 rounded inline-block"></span>
-        Selected Room
+      <div class="py-4 mb-5">
+        <div class="flex items-center mt-4 space-x-4">
+          <div
+            v-for="room in rooms"
+            :key="room.id"
+            class="flex flex-wrap items-center"
+          >
+            <span
+              class="w-6 h-6 bg-green-200 mr-2 rounded inline-block"
+              :style="`background-color: #${room.hexColor}`"
+            ></span
+            >{{ room.roomName }} Room
+          </div>
+          <div class="flex flex-wrap items-center">
+            <span class="w-6 h-6 mr-2 bg-gray-400 rounded inline-block"></span
+            >Not Available
+          </div>
+          <div class="flex flex-wrap items-center">
+            <span class="w-6 h-6 mr-2 bg-purple-200 rounded inline-block"></span
+            >Selected Room
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoomStore } from "@/stores/roomStore";
@@ -376,11 +349,29 @@ const submitBooking = async () => {
   }
 };
 
-const getRoomClass = (room: any) => {
-  if (room.isAvailable === false) return "room-unavailable";
-  const colors = ["room-a", "room-b", "room-c", "room-d", "room-e"];
-  return colors[room.id % colors.length];
+const getRoomClass = (roomName: any) => {
+  // if (room.isAvailable === false) return "room-unavailable";
+  const colors = [
+    {
+      id: 1,
+      roomName: "Diversity",
+      className: "diversity",
+    },
+    {
+      id: 2,
+      roomName: "Excellence",
+      className: "excellence",
+    },
+    {
+      id: 3,
+      roomName: "Positive_Attitude",
+      className: "positive-attitude",
+    },
+  ];
+  return colors.find((color) => color.roomName === roomName)?.className; //match name with roomName and return class name
 };
+
+useHead({ title: "Add Bookings" });
 </script>
 
 <style scoped>
@@ -408,36 +399,13 @@ const getRoomClass = (room: any) => {
   cursor: pointer;
   font-size: 14px;
 }
-.room-a {
-  background-color: #cce5ff;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
-.room-c {
-  background-color: #fff3cd;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
-.room-d {
-  background-color: #f8d7da;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
-.room-e {
-  background-color: #d1ecf1;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
-.room-b {
-  background-color: #d4edda;
-  border-left-width: 4px;
-  border-color: #007bff;
-}
 .room-unavailable {
   background-color: #dc3545;
   color: white;
 }
 .selected-room {
-  border: 2px solid #007bff;
+  border-left-width: 4px !important;
+  color: white;
+  text-shadow: rgba(0, 0, 0, 0.601) 2px 2px 10px;
 }
 </style>

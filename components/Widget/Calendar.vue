@@ -1,7 +1,5 @@
 <template>
   <div class="py-[25px] mx-auto max-w-[1440px]">
-    <!-- <pre>{{ userData }}</pre> -->
-    <!-- <pre>{{ eventSettings.dataSource }}</pre> -->
     <ejs-schedule
       height="550px"
       width="100%"
@@ -12,6 +10,7 @@
       :renderCell="onRenderCell"
       :eventSettings="eventSettings"
       :eventRendered="eventRendered"
+      :cellClick="disableClick"
     >
     </ejs-schedule>
   </div>
@@ -48,6 +47,10 @@ const meetingProps = defineProps({
   meetings: Array,
   userData: Object,
 });
+
+const disableClick = (args: any) => {
+  args.cancel = true; // Prevent default click actions
+};
 
 const onRenderCell = (args: RenderCellEventArgs) => {
   if (args.elementType == "currentDay") {
@@ -96,7 +99,7 @@ let toolTipTemplate: string =
 const eventSettings = ref({
   dataSource: meetingData.value, // This will be updated in the watch function
   // enableTooltip: true,
-  tooltipTemplate: toolTipTemplate,
+  // tooltipTemplate: toolTipTemplate,
   allowEditing: false,
   allowadding: false,
   allowDeleting: false,
@@ -136,7 +139,7 @@ watch(
         id: meeting.id,
         startTime: new Date(meeting.startDateTime),
         endTime: new Date(meeting.endDateTime),
-        location: meeting.room?.roomName || "No Room",
+        location: meeting.room?.roomName+" Room "|| "No Room",
         color: meeting.room?.hexColor || "#cccccc", // Ensure a valid color
       }));
     }

@@ -10,6 +10,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
   const totalPages = ref<number>(0);
+  const totalItems = ref<number>(0);
 
   // Fetch meeting data with dynamic parameters
   const fetchBookedMeeting = async (params: FetchMeetingParams) => {
@@ -33,7 +34,8 @@ export const useMeetingStore = defineStore('meetingStore', () => {
 
       if (response) {
         bookings.value = response.data.list;
-        totalPages.value = response.data.pagination.numberOfPages; // Store total pages from API
+        totalPages.value = response.data.pagination.numberOfPages;
+        totalItems.value = response.data.pagination.totalItemCount;
       } else {
         throw new Error("Failed to fetch meeting rooms");
       }

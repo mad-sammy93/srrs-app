@@ -1,38 +1,28 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import type { UserDetail, LoginResponse, RefreshResponse, GoogleSSOCallbackResponse } from '@/types'
 
-interface User {
-  id: number
-  fullName: string
-  email: string
-}
-
-interface LoginResponse {
-  status: number;
-  data: {
-    isTwoFAEnabled: boolean;
-    accessToken: string;
-  };
-  message: string;
-}
-
-interface RefreshResponse {
-  data: {
-    accessToken: string;
-  };
-  message: string;
+interface Logger {
+  type: string
+  message: string | undefined
+  duration: number
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const myDetails = ref<User | null>(null)
+  const myDetails = ref<UserDetail | null>(null)
   const token = ref<string | null>(null)
   const refreshToken = ref<string | null>(null);
   const showOtpScreen = ref(false);
   const tempToken = ref<string | null>(null);
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
-  const user = ref<{ email: string; password: string; fullName: string } | null>(null)
+  const logger = ref<Logger>({
+    type: '',
+    message: '' as string | undefined,
+    duration: 3000
+  })
+  const user = ref<UserDetail | null>(null)
   const qrCode = ref<string | null>(null)
   const step = ref<number>(1) // 🔥 Explicitly defining step
   const router = useRouter()
@@ -61,6 +51,34 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken.value = null;
   };
 
+  const googleSSOLogin = async () => {
+    try {
+      // const response = await $fetch('/api/auth/google-sso');
+      window.open('/api/auth/google-sso', '_self', 'noopener,noreferrer');//open in the same tab
+      // if (response && response.data.url) {
+      //   // Open Google SSO page in a new tab
+      //   window.open(response.data.url, '_blank', 'noopener,noreferrer');
+      // }
+    } catch (err: any) {
+      throw new Error(err.message || 'Login failed.');
+    }
+  };
+
+  const googleSSOCallback = async (code: string) => {
+    try {
+      const response = await $fetch<GoogleSSOCallbackResponse>('/api/auth/google-sso/callback', {
+        method: 'POST',
+        body: { code },
+      })
+
+      if (response.data.accessToken) {
+        setTokens(response.data.accessToken)
+      }
+    } catch (err) {
+      throw new Error((err as Error).message || 'SSO callback failed.')
+    }
+  }
+
   const login = async (credentials: { email: string; password: string }) => {
     try {
       const response = await $fetch<LoginResponse>('/api/auth/login', {
@@ -73,6 +91,8 @@ export const useAuthStore = defineStore('auth', () => {
         return true // Indicates OTP is needed
       } else {
         setTokens(response.data.accessToken)
+        console.log(response);
+
         return false // No OTP required, user is logged in
       }
     } catch (err: any) {
@@ -90,6 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
       })
       clearTokens()
     } catch (err: any) {
+      router.push('/auth/login')
       throw new Error(err.message || 'Logout failed.')
     }
   }
@@ -167,8 +188,9 @@ export const useAuthStore = defineStore('auth', () => {
           step.value = 2 // ✅ Move to 2FA step
         }
       }
-    } catch (error) {
+    } catch (err: any) {
       console.error('Signup failed:', error)
+      throw new Error(err.message || 'Signup failed.')
     }
   }
 
@@ -195,6 +217,8 @@ export const useAuthStore = defineStore('auth', () => {
     setTokens,
     clearTokens,
     login,
+    googleSSOLogin,
+    googleSSOCallback,
     logout,
     signup,
     resetAuth,

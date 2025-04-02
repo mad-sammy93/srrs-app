@@ -30,16 +30,17 @@ export interface FetchRoomResponse {
 }
 
 //USER
-export interface User {
-  id: number;
+export interface UserDetail {
+  id?: number;
   email: string;
   fullName: string;
-  userStatusId: number;
+  password?: string;
+  userStatusId?: number;
 }
 export interface FetchUserResponse {
   status: number
   data: {
-    list: User[]
+    list: UserDetail[]
   }
   message: string
 }
@@ -192,4 +193,27 @@ export interface AddBookingFormData {
   recurrencePatternId?: number | null;
   frequency?: number | null;
   weekdayId?: number | null;
+}
+
+export interface LoginResponse {
+  status: number;
+  data: {
+    isTwoFAEnabled: boolean;
+    accessToken: string;
+  };
+  message: string;
+}
+
+export interface RefreshResponse {
+  data: {
+    accessToken: string;
+  };
+  message: string;
+}
+export interface GoogleSSOCallbackResponse {
+  status: number;
+  message: string;
+  data: {
+    accessToken: string;
+  };
 }

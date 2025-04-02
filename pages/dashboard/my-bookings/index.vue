@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="flex justify-end items-center py-8">
-      <!-- <h3 class="text-2xl">My Bookings </h3> -->
+    <div class="flex justify-between items-center py-8">
+      <h3 class="text-xl text-blue-400 mb-4">My Bookings </h3>
       <button
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
         @click="addBooking"
@@ -24,7 +24,6 @@
     <button class="btn"></button>
   </div>
 </template>
-
 <script setup lang="ts">
 import { useMeetingStore } from "@/stores/meetingStore";
 import type { Meeting } from "@/types";
@@ -52,7 +51,7 @@ const loading = computed(() => meetingStore.loading);
 const fetchPageData = (pageNo: number) => {
   currentPage.value = pageNo;
   const params = {
-    myBookingsOnly: false,
+    myBookingsOnly: true,
     pageNo: pageNo,
     limit: itemsPerPage.value,
   };

@@ -51,9 +51,9 @@
             class="hover:bg-gray-100 font-normal"
           >
             <!-- <td class="p-3 border">{{ meeting.id }}</td> -->
-            <td class="p-3 border">{{ meeting.room.roomName }}</td>
-            <td class="p-3 border">{{ meeting.startDateTime.slice(0, 10) }}</td>
-            <td class="p-3 border">
+            <td class="p-3 border text-center">{{ meeting.startDateTime.slice(0, 10) }}</td>
+            <td class="p-3 border text-center">{{ meeting.room.roomName }}</td>
+            <td class="p-3 border text-center">
               {{
                 new Date(meeting.startDateTime).toLocaleTimeString("en-GB", {
                   hour: "2-digit",
@@ -61,7 +61,7 @@
                 })
               }}
             </td>
-            <td class="p-3 border">
+            <td class="p-3 border text-center">
               {{
                 new Date(meeting.endDateTime).toLocaleTimeString("en-GB", {
                   hour: "2-digit",
@@ -69,13 +69,13 @@
                 })
               }}
             </td>
-            <td class="p-3 border">
+            <td class="p-3 border text-center">
               {{ meeting.createdAt.slice(0, 10) }} ,
               {{ meeting.createdAt.slice(11, 16) }}
             </td>
-            <td class="p-3 border">{{ meeting.paxCount }}</td>
-            <td class="p-3 border">{{ meeting.agenda }}</td>
-            <td class="p-3 border">
+            <td class="p-3 border text-center">{{ meeting.paxCount }}</td>
+            <td class="p-3 border text-center">{{ meeting.agenda }}</td>
+            <td class="p-3 border text-center">
               <span class="flex justify-center items-center">
                 <span
                   class="flex w-2 h-2 mr-4 rounded-full"
@@ -99,7 +99,7 @@
                 
               </span> -->
             </td>
-            <td class="p-3 border flex justify-around">
+            <td class="p-3 border flex justify-around text-center">
               <button
                 class="text-blue-600 hover:underline mr-2"
                 @click="$emit('edit', meeting)"

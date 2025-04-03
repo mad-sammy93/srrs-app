@@ -1,10 +1,14 @@
 <template>
   <div class="p-8">
+    <UIModalLogger
+      :message="logger.message"
+      :type="logger.type"
+    />
     <div class="mb-4 text-gray-500">
-      <a
-        href="#"
+      <NuxtLink
+        to="/dashboard"
         class="text-blue-500"
-        >Dashboard</a
+        >Dashboard</NuxtLink
       >
       / <span>Book Room</span>
     </div>
@@ -46,61 +50,42 @@
           </div>
         </div>
         <div class="mb-4 flex items-center">
-          <input
-            v-model="form.isRecurring"
-            type="checkbox"
-            class="mr-2"
-          />
-          <label class="font-normal text-gray-500">Is Recurring?</label>
-        </div>
-        <div
-          v-if="form.isRecurring"
-          class="grid grid-cols-2 gap-4"
-        >
-          <div>
-            <label class="block font-normal text-gray-500"
-              >Recurrence Pattern</label
-            >
-            <select
-              v-model="form.recurrencePatternId"
-              class="input-field"
-            >
-              <option
-                :value="pattern.id"
-                v-for="pattern in recurrencePatterns"
-                :key="pattern.id"
-              >
-                {{ pattern.name }}
-              </option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-normal text-gray-500">Frequency</label>
-            <input
-              v-model="form.frequency"
-              type="number"
-              min="1"
-              class="input-field"
-            />
-          </div>
-        </div>
-        <div
-          v-if="form.isRecurring && form.recurrencePatternId == 2"
-          class="mb-4"
-        >
-          <label class="block font-normal text-gray-500">Select Weekday</label>
-          <select
-            v-model="form.weekdayId"
-            class="input-field"
+          <button
+            v-if="!form.isRecurring"
+            @click.prevent="
+              showRecurrenceModal = true;
+              form.isRecurring = true;
+            "
+            class="btn-primary border-2 border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white px-4 py-2 rounded-md"
           >
-            <option
-              v-for="(day, index) in weekdays"
-              :key="index"
-              :value="index + 1"
-            >
-              {{ day }}
-            </option>
-          </select>
+            Add meetin recurrence
+          </button>
+          <button
+            v-if="form.isRecurring"
+            @click.prevent="
+              showRecurrenceModal = true;
+              form.isRecurring = true;
+            "
+            class="btn-secondary border-2 border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white px-4 py-2 rounded-md"
+          >
+            Edit recurrence
+          </button>
+        </div>
+        <UIModalRecurrence
+          v-if="form.isRecurring"
+          :show="showRecurrenceModal"
+          @close="
+            showRecurrenceModal = false;
+            form.recurrencePatternId = 0;
+            form.frequency = 0;
+            form.weekdayId = 0;
+            form.isRecurring = false;
+          "
+          @save="handleRecurrence"
+        />
+        <div v-if="form.isRecurring">
+          {{ form.recurrencePatternId }} -- until {{ form.frequency }} --
+          weekday: {{ form.weekdayId }}
         </div>
         <div
           class="grid gap-4"
@@ -150,7 +135,7 @@
             />
           </div>
         </div>
-        <div class="mb-4">
+        <div class="my-4">
           <label class="block font-normal text-gray-500">Select Members</label>
           <select
             v-model="form.memberIds"
@@ -213,6 +198,9 @@ import { useUserStore } from "@/stores/userStore";
 import { useMeetingStore } from "@/stores/meetingStore";
 import { useAuthStore } from "@/stores/authStore";
 import type { FormData } from "@/types";
+import { useLogger } from "@/composables/useLogger"; // Import the composable
+
+const { logMessage } = useLogger(); // Use the logger
 
 const authStore = useAuthStore();
 const roomStore = useRoomStore();
@@ -221,18 +209,44 @@ const meetingStore = useMeetingStore();
 
 const rooms = storeToRefs(roomStore).roomList;
 const user = storeToRefs(userStore).usersList;
-const userId = computed(() => authStore.myDetails?.id);
+// const userId = computed(() => authStore.myDetails?.id);
 const weekdays = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
+  {
+    id: 1,
+    name: "Sunday",
+  },
+  {
+    id: 2,
+    name: "Monday",
+  },
+  {
+    id: 3,
+    name: "Tuesday",
+  },
+  {
+    id: 4,
+    name: "Wednesday",
+  },
+  {
+    id: 5,
+    name: "Thursday",
+  },
+  {
+    id: 6,
+    name: "Friday",
+  },
+  {
+    id: 7,
+    name: "Saturday",
+  },
 ];
 const loading = ref(false);
 const successMessage = ref("");
+const logger = ref({
+  message: "" as string | undefined,
+  type: "error",
+  duration: 3000,
+});
 
 onMounted(() => {
   let params = {
@@ -242,6 +256,15 @@ onMounted(() => {
   roomStore.fetchRoomsData();
   userStore.fetchUsers(params); //fetch all users
 });
+
+const showRecurrenceModal = ref(false);
+// Handle recurrence data
+const handleRecurrence = (options: any) => {
+  form.value.recurrencePatternId = options.frequency;
+  form.value.frequency = options.until;
+  form.value.weekdayId = options.weekdayId;
+  showRecurrenceModal.value = false;
+};
 
 const form = ref<FormData>({
   agenda: "",
@@ -287,28 +310,53 @@ const validateForm = () => {
     : undefined;
 
   if (!form.value.agenda || form.value.agenda.length > 40) {
-    alert("Agenda must be between 1 to 40 characters.");
+    logMessage("Agenda must be between 1 to 40 characters.","error");
     return false;
   }
   if (
     !form.value.meetingDate ||
     !/^\d{4}-\d{2}-\d{2}$/.test(form.value.meetingDate)
   ) {
-    alert("Meeting Date must be in YYYY-MM-DD format.");
+    logMessage("Meeting Date must be in YYYY-MM-DD format.","error");
     return false;
   }
   if (!form.value.startTime || !/^\d{2}:\d{2}$/.test(form.value.startTime)) {
-    alert("Start Time must be in HH:MM (24-hour) format.");
+    logMessage("Start Time must be in HH:MM (24-hour) format.","error");
     return false;
   }
   if (!form.value.endTime || !/^\d{2}:\d{2}$/.test(form.value.endTime)) {
-    alert("End Time must be in HH:MM (24-hour) format.");
+    logMessage("End Time must be in HH:MM (24-hour) format.","error");
     return false;
   }
   if (!form.value.roomId || isNaN(Number(form.value.roomId))) {
-    alert("Please select a valid room.");
+    logMessage("Please select a valid room.","error");
     return false;
   }
+
+  // Recurrence validation
+  if (form.value.isRecurring) {
+    if (!form.value.recurrencePatternId) {
+      logMessage("Please select a recurrence pattern.","error");
+      return false;
+    }
+    if (form.value.recurrencePatternId === 2 && !form.value.weekdayId) {
+      logMessage("Please select a weekday for weekly recurrence.","error");
+      return false;
+    }
+    if (!form.value.frequency || form.value.frequency <= 0) {
+      logMessage("Frequency must be a positive number.","error");
+      return false;
+    }
+    if (!form.value.meetingEndDate) {
+      logMessage("Please select a meeting end date for recurrence.","error");
+      return false;
+    }
+    if (form.value.meetingEndDate <= form.value.meetingDate) {
+      logMessage("Meeting end date must be after the start date.","error");
+      return false;
+    }
+  }
+
   return true;
 };
 
@@ -337,13 +385,22 @@ const submitBooking = async () => {
       bookingData.recurrencePatternId = 0;
     }
 
-    // console.log('[BOOKING DATA]', bookingData);
+    // Call API
+    const { data, error } = await meetingStore.bookMeetingRoom(bookingData);
 
-    const response = await meetingStore.bookMeetingRoom(bookingData);
-    successMessage.value = "Meeting successfully booked!";
-  } catch (error) {
-    console.error("Error booking meeting:", error);
-    alert("Error booking meeting. Please check your details and try again.");
+    if (error) {
+      console.error("API Error:", error); // Log error
+      logger.value.message = error; // Display error message from API
+      logger.value.type = "error";
+    } else {
+      logger.value.message =
+        data?.message || "Meeting room booked successfully";
+      logger.value.type = "success";
+    }
+  } catch (err: any) {
+    console.error("Unexpected Error:", err); // Log unexpected errors
+    logger.value.message = err.message || "An unexpected error occurred";
+    logger.value.type = "error";
   } finally {
     loading.value = false;
   }
@@ -395,7 +452,7 @@ useHead({ title: "Add Bookings" });
 }
 .room-btn {
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
 }
@@ -404,7 +461,7 @@ useHead({ title: "Add Bookings" });
   color: white;
 }
 .selected-room {
-  border-left-width: 4px !important;
+  border-left-width: 10px !important;
   color: white;
   text-shadow: rgba(0, 0, 0, 0.601) 2px 2px 10px;
 }

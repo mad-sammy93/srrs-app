@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useAuthStore } from './authStore';
-import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeetingRoomFormData, AddBookingFormData, BookMeetingRoomResponse, FetchBookingWIthIdResponse } from '@/types'
+import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeetingRoomFormData, AddBookingFormData, BookMeetingRoomResponse, FetchBookingWIthIdResponse, EditBookedMeetingRoomResponse } from '@/types'
 
 
 export const useMeetingStore = defineStore('meetingStore', () => {
@@ -55,6 +55,9 @@ export const useMeetingStore = defineStore('meetingStore', () => {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       })
+
+      // console.log('error', meeting, status, error);
+
       if (meeting) {
         console.log('fetchBookedMeetingWithId:', meeting);
         return { data: meeting, error: null };
@@ -66,7 +69,6 @@ export const useMeetingStore = defineStore('meetingStore', () => {
 
     }
   }
-
   const bookMeetingRoom = async (formData: AddBookingFormData) => {
     try {
       const cleanData = Object.fromEntries(
@@ -74,43 +76,57 @@ export const useMeetingStore = defineStore('meetingStore', () => {
           value !== null && value !== undefined && value !== ''
         )
       );
+
       const response = await $fetch<BookMeetingRoomResponse>('/api/booked-meeting-rooms', {
         body: cleanData,
         method: 'POST',
         headers: {
-          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : '',
         }
       });
-      if (!response) throw new Error('Failed to book meeting room')
-      return { data: response, error: null }; // Return the response data and null error
 
+      return { data: response, error: null }; // Return response data if successful
 
     } catch (err: any) {
-      error.value = err.message || 'Failed to book meeting room';
+      let errorMessage = "Failed to book meeting room"; // Default error
+
+      // Check if error response contains a message
+      if (err?.response?._data?.message) {
+        errorMessage = err.response._data.message; // Extract API error message
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      return { data: null, error: errorMessage }; // Return the error message
     }
-  }
+  };
+
+
 
   const editBookedMeetingRoom = async (meetingId: number, formData: EditBookedMeetingRoomFormData) => {
-    console.log('meetingId store', meetingId);
-
     try {
-      const response = await $fetch<EditBookedMeetingRoomFormData>(`/api/booked-meeting-rooms/${meetingId}`, {
+      const response = await $fetch<EditBookedMeetingRoomResponse>(`/api/booked-meeting-rooms/${meetingId}`, {
         method: 'PATCH',
         headers: {
-          Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
+          Authorization: authStore.token ? `Bearer ${authStore.token}` : ''
         },
         body: formData
       });
-      if (response) {
 
-        console.log('formData Meeting store', response);
-        return { data: response, error: null }; // Return the response data and null error
-      }
-      if (!response) throw new Error('Failed to book meeting room')
+      return { data: response.message, error: null };
     } catch (err: any) {
-      error.value = err.message || 'Failed to book meeting room';
+      // console.log('[CATCH BLOCK ERROR]', err);
+
+      let errorMessage = "Failed to update meeting room";
+      if (err?.response?._data?.message) {
+        errorMessage = err.response._data.message; // Extract API error message
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      return { data: null, error: errorMessage };
     }
-  }
+  };
 
   const deleteBookedMeetingRoom = async (meetingId: number, option: string) => {
     try {

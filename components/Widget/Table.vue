@@ -1,5 +1,6 @@
 <template>
   <div>
+    <UIModalLogger :message="logger.message" :type="logger.type"/>
     <div class="overflow-x-auto min-w-[1440px]">
       <div class="flex justify-between items-center mb-4">
         <!-- paginatedMeetings: {{ paginatedMeetings }} -->
@@ -51,8 +52,8 @@
             class="hover:bg-gray-100 font-normal"
           >
             <!-- <td class="p-3 border">{{ meeting.id }}</td> -->
-            <td class="p-3 border text-center">{{ meeting.startDateTime.slice(0, 10) }}</td>
             <td class="p-3 border text-center">{{ meeting.room.roomName }}</td>
+            <td class="p-3 border text-center">{{ meeting.startDateTime.slice(0, 10) }}</td>
             <td class="p-3 border text-center">
               {{
                 new Date(meeting.startDateTime).toLocaleTimeString("en-GB", {
@@ -104,13 +105,14 @@
                 class="text-blue-600 hover:underline mr-2"
                 @click="$emit('edit', meeting)"
               >
-                <UIAtomsIconsEditBooking />
+                <UIAtomsIconsEditBooking :color="`#60a5fa`"/>
               </button>
               <button
                 class="text-red-600 hover:underline"
                 @click="confirmDelete(meeting)"
+                :disabled="meetingStatus[index] !== 'Upcoming'"
               >
-                <UIAtomsIconsDeleteBooking />
+                <UIAtomsIconsDeleteBooking :color="meetingStatus[index] !== 'Upcoming' ? 'gray' : 'red'"/>
               </button>
             </td>
           </tr>
@@ -253,8 +255,15 @@ import type { Meeting } from "@/types";
 const showDeleteModal = ref(false);
 const selectedMeeting = ref<Meeting | null>(null);
 const deleteOption = ref<"SELECTED" | "SELECTED_AND_UPCOMING">("SELECTED");
+const disabledDelete = ref(false);
+const logger = ref({
+  message: "" as string | undefined,
+  type: "error",
+  duration: 3000,
+})
 
 const confirmDelete = (meeting: Meeting) => {
+  if(!meetingStatus.value.includes('Upcoming')) return noDeleteMeeting();
   selectedMeeting.value = meeting;
   showDeleteModal.value = true;
   deleteOption.value = "SELECTED";
@@ -271,7 +280,15 @@ const deleteMeeting = () => {
   showDeleteModal.value = false;
   selectedMeeting.value = null;
 };
+const noDeleteMeeting = () => {
+  disabledDelete.value = true;
+  logger.value.message = 'Cannot delete meeting';
+  logger.value.type = 'warning';
+  setTimeout(() => {
+    disabledDelete.value = false;
+  }, 2000);
 
+}
 const props = defineProps({
   meetings: {
     type: Array as () => Meeting[],

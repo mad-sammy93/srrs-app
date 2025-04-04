@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import { useAuthStore } from './authStore';
 import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeetingRoomFormData, AddBookingFormData, BookMeetingRoomResponse, FetchBookingWIthIdResponse, EditBookedMeetingRoomResponse } from '@/types'
 
-
 export const useMeetingStore = defineStore('meetingStore', () => {
   const authStore = useAuthStore();
   const bookings = ref<Meeting[]>([]);
@@ -37,10 +36,10 @@ export const useMeetingStore = defineStore('meetingStore', () => {
         totalPages.value = response.data.pagination.numberOfPages;
         totalItems.value = response.data.pagination.totalItemCount;
       } else {
-        throw new Error("Failed to fetch meeting rooms");
+        logMessage("Failed to fetch bookings", "error");
       }
     } catch (err: any) {
-      error.value = err.message || "Failed to fetch bookings";
+      logMessage(err.message || "Failed to fetch bookings", "error");
     } finally {
       loading.value = false;
     }
@@ -59,14 +58,17 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       // console.log('error', meeting, status, error);
 
       if (meeting) {
-        console.log('fetchBookedMeetingWithId:', meeting);
-        return { data: meeting, error: null };
+        // console.log('fetchBookedMeetingWithId:', meeting);
+        // logMessage('Meeting fetched successfully', 'success')
       }
 
-      if (!meeting) throw new Error('Failed to fetch meeting room')
+      if (!meeting) {
+        logMessage('Meeting not found', 'error')
+      }
+
       return { data: meeting, error: null }; // Return the response data and null error
     } catch (err: any) {
-
+      logMessage(err.message || 'Failed to fetch meeting', 'error')
     }
   }
   const bookMeetingRoom = async (formData: AddBookingFormData) => {
@@ -84,7 +86,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '',
         }
       });
-
+      logMessage(response.message, 'success')
       return { data: response, error: null }; // Return response data if successful
 
     } catch (err: any) {
@@ -92,9 +94,11 @@ export const useMeetingStore = defineStore('meetingStore', () => {
 
       // Check if error response contains a message
       if (err?.response?._data?.message) {
-        errorMessage = err.response._data.message; // Extract API error message
+        logMessage(err.response._data.message, 'error')
+        // errorMessage = err.response._data.message; // Extract API error message
       } else if (err?.message) {
-        errorMessage = err.message;
+        logMessage(err.message, 'error')
+        // errorMessage = err.message;
       }
 
       return { data: null, error: errorMessage }; // Return the error message
@@ -112,7 +116,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
         },
         body: formData
       });
-
+      logMessage(response.message, 'success')
       return { data: response.message, error: null };
     } catch (err: any) {
       // console.log('[CATCH BLOCK ERROR]', err);
@@ -120,8 +124,9 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       let errorMessage = "Failed to update meeting room";
       if (err?.response?._data?.message) {
         errorMessage = err.response._data.message; // Extract API error message
+        logMessage(errorMessage, 'error')
       } else if (err?.message) {
-        errorMessage = err.message;
+        logMessage(errorMessage, 'error')
       }
 
       return { data: null, error: errorMessage };
@@ -136,9 +141,10 @@ export const useMeetingStore = defineStore('meetingStore', () => {
           Authorization: authStore.token ? `Bearer ${authStore.token}` : '' // Add token if available
         }
       });
-      if (!response) throw new Error('Failed to book meeting room')
+      if (response) logMessage('Booking deleted successfully', 'success')
+      if (!response) logMessage('Failed to delete booking', 'error')
     } catch (err: any) {
-      error.value = err.message || 'Failed to book meeting room';
+      logMessage(err.message || 'Failed to delete booking', 'error')
     }
   }
 

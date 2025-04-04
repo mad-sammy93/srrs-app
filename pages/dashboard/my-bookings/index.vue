@@ -9,7 +9,6 @@
         Book Room
       </button>
     </div>
-    <!-- {{ currentPage }} / {{ totalPages }} -->
     <WidgetTable
       :meetings="meetingStore.bookings"
       :currentPage="currentPage"
@@ -38,22 +37,29 @@ const loading = computed(() => meetingStore.loading);
 
 //TODO
 // const filteredBookings = computed(() => {
-//   if (!searchFilter.value) return meetingStore.bookings;
-//   return meetingStore.bookings.filter(
-//     (meeting: Meeting) =>
-//       meeting.room.roomName
-//         .toLowerCase()
-//         .includes(searchFilter.value.toLowerCase()) ||
-//       meeting.agenda.toLowerCase().includes(searchFilter.value.toLowerCase())
-//   );
-// });
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-const fetchPageData = (pageNo: number) => {
+// });
+watch(searchFilter, (newFilter) => {
+  debounce(() => {
+    fetchPageData(currentPage.value, newFilter); // Call the API with debounced delay
+  }, 1000); // Adjust debounce delay (500ms in this example)
+});
+
+const debounce = (callback: () => void, delay: number) => {
+  if (timeoutId) {
+    clearTimeout(timeoutId); // Clear the previous timeout
+  }
+  timeoutId = setTimeout(callback, delay); // Set a new timeout
+};
+
+const fetchPageData = (pageNo: number, filter = searchFilter.value) => {
   currentPage.value = pageNo;
   const params = {
     myBookingsOnly: true,
     pageNo: pageNo,
     limit: itemsPerPage.value,
+    filter: filter || undefined, // Only include filter if it's not empty
   };
   meetingStore.fetchBookedMeeting(params);
 };
@@ -72,8 +78,9 @@ const editBookedMeetingRoom = (meeting: Meeting) => {
   navigateTo(`/dashboard/my-bookings/edit/${meeting.id}`);
 };
 
-const cancelBookedMeetingRoom = (meeting: Meeting, option: string) => {
-  meetingStore.deleteBookedMeetingRoom(meeting.id, option);
+const cancelBookedMeetingRoom = async (meeting: Meeting, option: string)=> {
+  await meetingStore.deleteBookedMeetingRoom(meeting.id, option);
+  fetchPageData(1);
 };
 
 const addBooking = () => {

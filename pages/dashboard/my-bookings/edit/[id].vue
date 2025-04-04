@@ -1,10 +1,5 @@
 <template>
   <div class="p-8">
-    {{ loading }}
-    <UIModalLogger
-      :message="logger.message"
-      :type="logger.type"
-    />
     <div class="mb-4 text-gray-500">
       <a
         href="#"
@@ -12,22 +7,21 @@
         >Dashboard</a
       >
       / <span>Edit Booking</span>
-      {{ loading }}
     </div>
     <div class="p-4 mb-4">
-      <h1 class="text-4xl font-light mb-4">Edit Booking</h1>
+      <h1 class="text-4xl font-light mb-4 dark:text-white">Edit Booking</h1>
     </div>
     <div
-      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[50px] bg-white shadow-md rounded-lg"
+      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[50px] bg-white  dark:bg-slate-800  shadow-md rounded-lg"
     >
       <form @submit.prevent="submitEdit">
         <!-- Agenda -->
         <div class="mb-4">
-          <label class="block font-normal text-gray-500">Agenda</label>
+          <label class="block font-normal text-gray-500 dark:text-white">Agenda</label>
           <input
             v-model="form.agenda"
             type="text"
-            class="input-field"
+            class="input-field dark:bg-slate-600 dark:text-white"
             v-show="!loading"
             required
           />
@@ -55,7 +49,7 @@
 
         <!-- Select Room -->
         <div class="mb-4">
-          <label class="block mb-2 text-gray-500">Select Room</label>
+          <label class="block mb-2 text-gray-500 dark:text-white">Select Room</label>
           <div class="flex flex-wrap gap-2 mb-6">
             <button
               v-for="room in rooms"
@@ -138,11 +132,11 @@
         <!-- Meeting Date, Time and Members -->
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block font-normal text-gray-500">Meeting Date</label>
+            <label class="block font-normal text-gray-500 dark:text-white">Meeting Date</label>
             <input
               v-model="form.meetingDate"
               type="date"
-              class="input-field"
+              class="input-field dark:bg-slate-600 dark:text-white"
               required
               v-show="!loading"
             />
@@ -169,11 +163,11 @@
             </div>
           </div>
           <div>
-            <label class="block font-normal text-gray-500">Start Time</label>
+            <label class="block font-normal text-gray-500 dark:text-white">Start Time</label>
             <input
               v-model="form.startTime"
               type="time"
-              class="input-field"
+              class="input-field dark:bg-slate-600 dark:text-white"
               required
               v-show="!loading"
             />
@@ -200,11 +194,11 @@
             </div>
           </div>
           <div>
-            <label class="block font-normal text-gray-500">End Time</label>
+            <label class="block font-normal text-gray-500 dark:text-white">End Time</label>
             <input
               v-model="form.endTime"
               type="time"
-              class="input-field"
+              class="input-field dark:bg-slate-600 dark:text-white"
               required
               v-show="!loading"
             />
@@ -231,13 +225,12 @@
             </div>
           </div>
         </div>
-
-        <div class="mb-4">
-          <label class="block font-normal text-gray-500">Select Members</label>
+        <div class="my-4">
+          <label class="block font-normal text-gray-500 dark:text-white">Members / Guest</label>
           <select
             v-model="form.memberIds"
             multiple
-            class="input-field"
+            class="input-field dark:bg-slate-600 dark:text-white"
             v-show="!loading"
           >
             <option
@@ -308,20 +301,22 @@
         </div>
 
         <!-- Submit Button -->
-        <button
-          type="submit"
-          class="btn-primary"
-          :disabled="loading"
-        >
-          {{ loading ? "Updating..." : "Update Booking" }}
-        </button>
-        <button
-          type="button"
-          class="border border-1 border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white px-4 py-2 rounded-md"
-          @click="cancelEdit"
-        >
-          Cancel
-        </button>
+        <div class="flex flex-wrap justify-end">
+          <button
+            type="button"
+            class="mr-4 border border-1 border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white px-4 py-2 rounded-md"
+            @click="cancelEdit"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn-primary"
+            :disabled="loading"
+          >
+            {{ loading ? "Updating..." : "Update Booking" }}
+          </button>
+        </div>
       </form>
       <div class="py-4 mb-5">
         <div class="flex items-center mt-4 space-x-4">
@@ -348,7 +343,7 @@
           <div
             v-for="room in rooms"
             :key="room.id"
-            class="flex flex-wrap items-center"
+            class="flex flex-wrap items-center dark:text-white"
           >
             <span
               class="w-6 h-6 bg-green-200 mr-2 rounded inline-block"
@@ -356,11 +351,11 @@
             ></span
             >{{ room.roomName }} Room
           </div>
-          <div class="flex flex-wrap items-center">
+          <div class="flex flex-wrap items-center dark:text-white">
             <span class="w-6 h-6 mr-2 bg-gray-400 rounded inline-block"></span
             >Not Available
           </div>
-          <div class="flex flex-wrap items-center">
+          <div class="flex flex-wrap items-center dark:text-white">
             <span class="w-6 h-6 mr-2 bg-purple-200 rounded inline-block"></span
             >Selected Room
           </div>
@@ -371,9 +366,9 @@
         v-if="confirmModalVisible"
         class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center"
       >
-        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-          <h3 class="text-lg font-semibold mb-4">Apply Changes</h3>
-          <p class="text-gray-600 mb-4">Do you want to apply the changes to:</p>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-lg w-96">
+          <h3 class="text-lg font-semibold mb-4 dark:text-white">Apply Changes</h3>
+          <p class="text-gray-600 mb-4 dark:text-gray-300">Do you want to apply the changes to:</p>
 
           <div
             class="flex flex-col gap-3"
@@ -381,14 +376,14 @@
           >
             <button
               @click="confirmEdit('SELECTED')"
-              class="btn-secondary"
+              class="btn-secondary dark:text-white"
             >
               Only this meeting
             </button>
 
             <button
               @click="confirmEdit('SELECTED_AND_UPCOMING')"
-              class="btn-primary"
+              class="btn-primary dark:text-white"
             >
               This and upcoming meetings
             </button>
@@ -403,7 +398,7 @@
           </button>
           <button
             @click="confirmModalVisible = false"
-            class="mt-4 text-gray-500 hover:text-gray-700"
+            class="btn-secondary mt-4 text-gray-500 dark:text-white hover:text-gray-700"
           >
             Cancel
           </button>
@@ -419,9 +414,6 @@ import { useUserStore } from "@/stores/userStore";
 import { useMeetingStore } from "@/stores/meetingStore";
 import { useRoute } from "vue-router";
 import type { FormData, EditBookedMeetingRoomFormData } from "@/types";
-import { useLogger } from "@/composables/useLogger"; // Import the composable
-
-const { logMessage } = useLogger(); // Use the logger
 
 const roomStore = useRoomStore();
 const userStore = useUserStore();
@@ -445,12 +437,6 @@ const weekdays = [
 
 const route = useRoute();
 const meetingId = Number(route.params.id);
-const logger = ref({
-  message: "" as string ,
-  type: "error",
-  duration: 3000,
-});
-
 const form = ref<FormData>({
   id: 0,
   agenda: "",
@@ -480,7 +466,13 @@ onMounted(async () => {
   try {
     loading.value = true;
     const meeting = await meetingStore.fetchBookedMeetingWithId(meetingId);
-    if (!meeting) throw new Error("Failed to fetch meeting room");
+    if (!meeting) {
+      logMessage("Booking not found.", "error");
+      setTimeout(() => {
+        logMessage("Redirecting to dashboard", "info");
+        navigateTo('/dashboard/my-bookings')
+      }, 2000);
+    }
     if (meeting) {
       // console.log('Fetching meeting:', meeting.data);
       form.value = {
@@ -504,7 +496,7 @@ onMounted(async () => {
     }
   } catch (error) {
     loading.value = false;
-    console.error("Error fetching rooms:", error);
+    logMessage("Error fetching rooms", "error");
   }
 });
 
@@ -530,42 +522,42 @@ const validateForm = () => {
     !form.value.meetingDate ||
     !/^\d{4}-\d{2}-\d{2}$/.test(form.value.meetingDate)
   ) {
-    logMessage("Meeting Date must be in YYYY-MM-DD format.","error");
+    logMessage("Meeting Date must be in YYYY-MM-DD format.", "error");
     return false;
   }
   if (!form.value.startTime || !/^\d{2}:\d{2}$/.test(form.value.startTime)) {
-    logMessage("Start Time must be in HH:MM (24-hour) format.","error");
+    logMessage("Start Time must be in HH:MM (24-hour) format.", "error");
     return false;
   }
   if (!form.value.endTime || !/^\d{2}:\d{2}$/.test(form.value.endTime)) {
-    logMessage("End Time must be in HH:MM (24-hour) format.","error");
+    logMessage("End Time must be in HH:MM (24-hour) format.", "error");
     return false;
   }
   if (!form.value.roomId || isNaN(Number(form.value.roomId))) {
-    logMessage("Please select a valid room.","error");
+    logMessage("Please select a valid room.", "error");
     return false;
   }
 
   // Recurrence validation
   if (form.value.isRecurring) {
     if (!form.value.recurrencePatternId) {
-      logMessage("Please select a recurrence pattern.","error");
+      logMessage("Please select a recurrence pattern.", "error");
       return false;
     }
     if (form.value.recurrencePatternId === 2 && !form.value.weekdayId) {
-      logMessage("Please select a weekday for weekly recurrence.","error");
+      logMessage("Please select a weekday for weekly recurrence.", "error");
       return false;
     }
-    if (!form.value.frequency || form.value.frequency <= 0) {
-      logMessage("Frequency must be a positive number.","error");
-      return false;
-    }
+    // if (!form.value.frequency || form.value.frequency <= 0) {
+    //   logMessage("Frequency must be a positive number.", "error");
+    //   return false;
+    // }
     if (!form.value.meetingEndDate) {
-      logMessage("Please select a meeting end date for recurrence.","error");
+      logMessage("Please select a meeting end date for recurrence.", "error");
       return false;
     }
     if (form.value.meetingEndDate <= form.value.meetingDate) {
-      logMessage("Meeting end date must be after the start date.","error");
+      logMessage("Meeting end date must be after the start date.", "error");
       return false;
     }
   }
@@ -611,26 +603,24 @@ const confirmEdit = async (option: string) => {
   confirmModalVisible.value = false;
   loading.value = true;
 
-    const { data:response, error } = await meetingStore.editBookedMeetingRoom(meetingId, {
+  const { data: response, error } = await meetingStore.editBookedMeetingRoom(
+    meetingId,
+    {
       ...form.value,
       option: selectedOption.value, // Send selected option to API
       meetingEndDate: form.value.isRecurring
         ? form.value.meetingEndDate
         : form.value.meetingDate,
-    });
+    }
+  );
 
-    if (response) {
-      loading.value = false;
-      logger.value.message = response || "Meeting updated successfully!";
-      logger.value.type = "success";
-      loading.value = false;
-    }
-    else if( error )
-    {
-      logger.value.message = error;
-      logger.value.type = "error";
-      loading.value = false;
-    }
+  if (response) {
+    loading.value = false;
+    logMessage(response, "success"); // 🔥 Use the logger utility
+  } else if (error) {
+    logMessage(error, "error"); // 🔥 Use the logger utility
+    loading.value = false;
+  }
 };
 
 const getRoomClass = (roomName: any) => {
@@ -667,19 +657,20 @@ useHead({ title: "Edit Booking" });
   margin-top: 4px;
 }
 .btn-primary {
-  background-color: #007bff;
+  background-color: #35464D;
   color: white;
   padding: 8px 12px;
   border-radius: 4px;
   cursor: pointer;
 }
 .btn-primary:hover {
-  background-color: #0056b3;
+  background-color: #007bff;
 }
 .room-btn {
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: 10px;
   cursor: pointer;
+  font-size: 14px;
 }
 .room-unavailable {
   background-color: #dc3545;

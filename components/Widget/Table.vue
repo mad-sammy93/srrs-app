@@ -6,7 +6,7 @@
         <!-- paginatedMeetings: {{ paginatedMeetings }} -->
         <h3
           v-if="title"
-          class="text-2xl font-semibold mb-4"
+          class="text-2xl font-semibold mb-4 dark:text-white"
         >
           {{ title }}
         </h3>
@@ -28,10 +28,10 @@
       </div>
 
       <table
-        class="min-w-full bg-white border border-gray-300 text-gray-500"
+        class="min-w-full bg-white border dark:bg-slate-800 dark:text-white border-gray-300 text-gray-500"
         v-if="!loading"
       >
-        <thead class="bg-white font-bold">
+        <thead class="bg-white font-extrabold text-gray-700 dark:bg-slate-900 dark:text-white">
           <tr>
             <!-- <th class="p-3 border">ID</th> -->
             <th class="p-3 border">Room Name</th>
@@ -49,9 +49,8 @@
           <tr
             v-for="(meeting, index) in paginatedMeetings"
             :key="index"
-            class="hover:bg-gray-100 font-normal"
+            class="hover:bg-gray-100 font-normal dark:hover:text-black"
           >
-            <!-- <td class="p-3 border">{{ meeting.id }}</td> -->
             <td class="p-3 border text-center">{{ meeting.room.roomName }}</td>
             <td class="p-3 border text-center">{{ meeting.startDateTime.slice(0, 10) }}</td>
             <td class="p-3 border text-center">
@@ -90,15 +89,6 @@
                 ></span>
                 {{ meetingStatus[index] }}
               </span>
-              <!-- <span
-                :class="{
-                  'text-green-600': meetingStatus[index] === 'Upcoming',
-                  'text-blue-600': meetingStatus[index] === 'In Progress',
-                  'text-gray-600': meetingStatus[index] === 'Completed',
-                }"
-              >{{ meetingStatus[index] }}
-                
-              </span> -->
             </td>
             <td class="p-3 border flex justify-around text-center">
               <button
@@ -118,8 +108,8 @@
           </tr>
         </tbody>
       </table>
-      <table class="min-w-full bg-white border border-gray-300 text-gray-500" v-else>
-        <thead class="bg-white font-bold">
+      <table class="min-w-full bg-white border border-gray-300 text-gray-500 dark:bg-slate-800 dark:text-white" v-else>
+        <thead class="bg-white font-extrabold text-gray-700  dark:bg-slate-900 dark:text-white">
           <tr>
             <!-- <th class="p-3 border">ID</th> -->
             <th class="p-3 border">Room Name</th>
@@ -162,9 +152,6 @@
             </td>
             <td class="p-3 border">
               <div class="h-4 bg-gray-300 rounded w-32"></div>
-            </td>
-            <td class="p-3 border">
-              <div class="h-4 bg-gray-300 rounded w-16"></div>
             </td>
             <td class="p-3 border flex justify-center space-x-2">
               <div class="h-4 bg-gray-300 rounded w-8"></div>
@@ -226,7 +213,7 @@
     </div>
 
     <!-- Pagination Controls -->
-    <div class="flex justify-between items-center mt-4">
+    <div class="flex justify-between items-center mt-4 dark:text-white">
       <button
         @click="prevPage"
         :disabled="currentPage === 1"
@@ -240,7 +227,7 @@
       <button
         @click="nextPage"
         :disabled="currentPage >= totalPages"
-        class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+        class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 dark:bg-blue-500"
       >
         Next
       </button>
@@ -333,18 +320,18 @@ const totalPages = computed(() => props.totalPages);
 watch(
   () => props.totalPages,
   (newTotalPages, oldTotalPages) => {
-    console.log(
-      `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
-    );
+  //   logMessage(
+  //     `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
+  //   ,'info');
   }
 );
 
 watch(
   () => props.currentPage,
   (newCurrentPage, oldCurrentPage) => {
-    console.log(
-      `Current page changed from ${oldCurrentPage} to ${newCurrentPage}`
-    );
+    // logMessage(
+    //   `Current page changed from ${oldCurrentPage} to ${newCurrentPage}`
+    //   ,'info');
   }
 );
 

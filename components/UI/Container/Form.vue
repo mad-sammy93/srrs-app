@@ -1,13 +1,13 @@
 <template>
-  <div class="flex flex-col items-center justify-center p-8 bg-sky-300 dark:bg-slate-300">
+  <div class="flex flex-col items-center justify-center p-8 bg-white dark:bg-slate-300">
     <div
-      class="w-full p-4   flex  items-center justify-center"
+      class="w-full p-4 flex  items-center justify-center"
     >
       <NuxtLink
         to="https://smartshore.com"
-        class="text-white font-medium text-4xl hover:underline dark:text-white"
+        class="text-white font-medium text-4xl hover:underline dark:text-white mb-[40px]"
         >
-        <UIAtomsLogo color="#000" />
+        <UIAtomsLogo color="#000" width="480" />
       </NuxtLink>
     </div>
     <slot />

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <footer class="bg-sky-200 shadow-sm dark:bg-sky-500 p-2">
+    <footer class="bg-sky-400 shadow-sm dark:bg-slate-800 p-2">
       <div
         class="w-full mx-auto max-w-screen-xl p-2 md:flex md:items-center md:justify-center"
       >

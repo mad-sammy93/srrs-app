@@ -1,5 +1,5 @@
 <template>
-  <div class="w-[80px] h-screen bg-sky-500 text-white flex flex-col">
+  <div class="w-[75px] h-screen bg-sky-400 dark:bg-slate-800 text-white flex flex-col">
     <nav class="flex-1">
       <ul>
         <li
@@ -13,7 +13,7 @@
           >
             <component
               :is="item.icon"
-              class="w-7 h-7 mb-2"
+              class="w-5 h-5 mb-2"
             />
             {{ item.name }}
           </NuxtLink>

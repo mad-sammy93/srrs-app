@@ -217,3 +217,11 @@ export interface GoogleSSOCallbackResponse {
     accessToken: string;
   };
 }
+
+export interface EditBookedMeetingRoomResponse {
+  statusCode: number;
+  url: string;
+  method: string;
+  message: string;
+  timestamp: string;
+}

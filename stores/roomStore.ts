@@ -15,8 +15,10 @@ export const useRoomStore = defineStore('room', () => {
         }
       })
       roomList.value = response.data.list
+      // logMessage('Rooms fetched successfully', 'success')
     } catch (err) {
-      console.error('Error fetching rooms:', err)
+      // console.error('Error fetching rooms:', err)
+      logMessage('Error fetching rooms', 'error')
     }
   }
   return { roomList, fetchRoomsData }

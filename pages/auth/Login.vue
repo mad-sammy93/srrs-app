@@ -125,9 +125,9 @@ const handleSubmit = async () => {
       }
     }
   } catch (err: any) {
-    console.log(err);
-    
-    logger.value.message = err.message || 'Login failed. Please try again.'
+    // console.log(err);
+    logMessage(err.message || 'Login failed. Please try again.', 'error');
+    // logger.value.message = err.message || 'Login failed. Please try again.'
   } finally {
     loading.value = false
   }

@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="relative flex flex-col items-center justify-between p-8">
-      <h1 class="text-5xl text-blue-500 mb-4">
+    <div class="relative flex flex-col items-center justify-between p-8 ">
+      <h1 class="text-5xl text-blue-500 dark:text-blue-200 mb-4">
         Welcome {{ authStore.myDetails?.fullName }}
       </h1>
-      <span class="text-slate-600 text-xl"
+      <span class="text-slate-600 text-xl dark:text-white"
         >Room Booking System is a booking application designed for teams.</span
       >
       <button
@@ -19,23 +19,23 @@
       :user-data="users"
     />
     <div class="py-4 mb-5 border-gray-300 border-t border-dotted">
-      <div class="flex items-center mt-4 space-x-4">
+      <div class="flex items-center mt-4 space-x-8">
         <div
           v-for="room in rooms"
           :key="room.id"
-          class="flex flex-wrap items-center"
+          class="flex flex-wrap items-center dark:text-white"
         >
           <span
-            class="w-6 h-6 bg-green-200 mr-2 rounded inline-block"
+            class="w-6 h-6  mr-2 rounded inline-block dark:text-white"
             :style="`background-color: #${room.hexColor}`"
           ></span
           >{{ room.roomName }} Room
         </div>
-        <div class="flex flex-wrap items-center">
+        <div class="flex flex-wrap items-center dark:text-white">
           <span class="w-6 h-6 mr-2 bg-gray-400 rounded inline-block"></span>Not
           Available
         </div>
-        <div class="flex flex-wrap items-center">
+        <div class="flex flex-wrap items-center dark:text-white">
           <span class="w-6 h-6 mr-2 bg-purple-200 rounded inline-block"></span
           >Selected Room
         </div>
@@ -85,7 +85,8 @@ onMounted(async () => {
     await meetingStore.fetchBookedMeeting(MeetingParams); // Ensure data is loaded before proceeding
     // console.log("After fetching, bookings:", meetingStore.bookings)
   } catch (error) {
-    console.error("Error fetching meetings:", error);
+    // console.error("Error fetching meetings:", error);
+    logMessage("Error fetching meetings", "error");
   }
 
   // Fetch data on mount

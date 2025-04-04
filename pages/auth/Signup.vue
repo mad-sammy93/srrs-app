@@ -1,7 +1,7 @@
 <template>
   <div class="bg-transparent">
-    {{ errorMessage }}
-    <UIModalLogger type="error" :message="errorMessage" />
+    <!-- {{ errorMessage }} -->
+    <!-- <UIModalLogger type="error" :message="errorMessage" /> -->
 
     <form class="min-w-[300px] mx-auto" @submit.prevent="authStore.step === 1 ? handleSignup() : handleOTP()">
       <div v-if="authStore.step === 1">
@@ -55,9 +55,9 @@
       </div>
 
       <!-- Error Message -->
-      <p v-if="errorMessage" class="relative rounded border-rose-500 p-1 bg-white text-red-500 text-sm mb-3">
+      <!-- <p v-if="errorMessage" class="relative rounded border-rose-500 p-1 bg-white text-red-500 text-sm mb-3">
         {{ errorMessage }}
-      </p>
+      </p> -->
 
        <!-- Google Sign-In Button -->
       <hr class="my-[40px] border-gray-700">
@@ -94,12 +94,12 @@ const fullName = ref('')
 const otp = ref('')
 
 const loading = ref(false)
-const errorMessage = ref<string | undefined>(undefined)
+// const errorMessage = ref<string | undefined>(undefined)
 
 // Step 1: Handle Signup
 const handleSignup = async () => {
   loading.value = true
-  errorMessage.value = undefined
+  // errorMessage.value = undefined
 
   try {
     const success = await authStore.signup(email.value, password.value, fullName.value)
@@ -108,20 +108,22 @@ const handleSignup = async () => {
       authStore.step = 2
     }
   } catch (err:any) {
-    errorMessage.value = err.message  || 'Signup failed. Please try again.'
-    console.error(errorMessage)
+    // errorMessage.value = err.message  || 'Signup failed. Please try again.'
+    logMessage( err.message  || 'Signup failed. Please try again.', 'error')
+    // console.error(errorMessage)
   }
 }
 
 const handleGoogleSignup = async () => {
   loading.value = true
-  errorMessage.value = undefined
+  // errorMessage.value = undefined
 
   try {
     await authStore.googleSSOLogin()
     // router.push('/dashboard') // Redirect after successful Google login
   } catch (err: any) {
-    errorMessage.value = err.message || 'Google Signup failed. Please try again.'
+    // errorMessage.value = err.message || 'Google Signup failed. Please try again.'
+    logMessage(err.message || 'Google Signup failed. Please try again.', 'error')
   } finally {
     loading.value = false
   }
@@ -131,6 +133,7 @@ const handleGoogleSignup = async () => {
 const handleOTP = async () => {
   const success = await authStore.signup(email.value, password.value, fullName.value ,String(otp.value) )
   if (success) {
+    logMessage('Signup successful.', 'success')
     router.push('/auth/login')
   }
 }

@@ -19,15 +19,16 @@ onMounted(async () => {
   const code = route.query.code
 
   if (!code) {
-    console.error('No code provided')
+    logMessage('No code found ', 'error')
     return router.push('/login') // Redirect if no code is found
   }
 
   try {
     await authStore.googleSSOCallback(code)
+    logMessage('SSO Login successful.', 'success')
     router.push('/dashboard') // Redirect after successful login
   } catch (error) {
-    console.error('SSO Login failed:', error)
+    logMessage(error.message || 'SSO Login failed. Please try again.', 'error')
     router.push('/auth/login') // Redirect on failure
   }
 })

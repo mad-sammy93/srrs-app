@@ -3,11 +3,11 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { UserDetail, LoginResponse, RefreshResponse, GoogleSSOCallbackResponse } from '@/types'
 
-interface Logger {
-  type: string
-  message: string | undefined
-  duration: number
-}
+// interface Logger {
+//   type: string
+//   message: string | undefined
+//   duration: number
+// }
 
 export const useAuthStore = defineStore('auth', () => {
   const myDetails = ref<UserDetail | null>(null)
@@ -17,11 +17,11 @@ export const useAuthStore = defineStore('auth', () => {
   const tempToken = ref<string | null>(null);
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
-  const logger = ref<Logger>({
-    type: '',
-    message: '' as string | undefined,
-    duration: 3000
-  })
+  // const logger = ref<Logger>({
+  //   type: '',
+  //   message: '' as string | undefined,
+  //   duration: 3000
+  // })
   const user = ref<UserDetail | null>(null)
   const qrCode = ref<string | null>(null)
   const step = ref<number>(1) // 🔥 Explicitly defining step
@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const setTokens = (newAccessToken: string) => {
-    console.log('[SET TOKEN]');
+    // logMessage('[SET TOKEN]', 'success');
 
     token.value = newAccessToken
     localStorage.setItem('token', newAccessToken)
@@ -60,6 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
       //   window.open(response.data.url, '_blank', 'noopener,noreferrer');
       // }
     } catch (err: any) {
+      logMessage(err.message || 'Login failed.', 'error');
       throw new Error(err.message || 'Login failed.');
     }
   };
@@ -75,6 +76,7 @@ export const useAuthStore = defineStore('auth', () => {
         setTokens(response.data.accessToken)
       }
     } catch (err) {
+      logMessage((err as Error).message || 'SSO callback failed.', 'error');
       throw new Error((err as Error).message || 'SSO callback failed.')
     }
   }
@@ -91,11 +93,13 @@ export const useAuthStore = defineStore('auth', () => {
         return true // Indicates OTP is needed
       } else {
         setTokens(response.data.accessToken)
-        console.log(response);
+        // console.log(response);
+        logMessage('Login successful', 'success');
 
         return false // No OTP required, user is logged in
       }
     } catch (err: any) {
+      logMessage(err.message || 'Login failed.', 'error');
       throw new Error(err.message || 'Login failed.')
     }
   }
@@ -109,8 +113,10 @@ export const useAuthStore = defineStore('auth', () => {
         },
       })
       clearTokens()
+      logMessage('You have logged out successfully', 'success');
     } catch (err: any) {
       router.push('/auth/login')
+      logMessage(err.message || 'Logout failed.', 'error');
       throw new Error(err.message || 'Logout failed.')
     }
   }
@@ -130,7 +136,8 @@ export const useAuthStore = defineStore('auth', () => {
       }
       return false;
     } catch (error) {
-      console.error('Failed to refresh token:', error);
+      // console.error('Failed to refresh token:', error);
+      logMessage('Failed to refresh token.', 'error');
       return false;
     }
 
@@ -145,10 +152,11 @@ export const useAuthStore = defineStore('auth', () => {
         },
         body: { otp }
       })
-
+      logMessage('OTP verification successful', 'success');
       setTokens(response.data.accessToken)
       tempToken.value = null // Clear temp token
     } catch (err: any) {
+      logMessage(err.message || 'OTP verification failed.', 'error');
       throw new Error(err.message || 'OTP verification failed.')
     }
   }
@@ -168,7 +176,8 @@ export const useAuthStore = defineStore('auth', () => {
         })
 
         if (response) {
-          alert('Signup successful! Redirecting...')
+          // alert('Signup successful! Redirecting...')
+          logMessage('Signup successful', 'success')
           resetAuth() // ✅ Clear store data
           return true
         }
@@ -189,7 +198,8 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
     } catch (err: any) {
-      console.error('Signup failed:', error)
+      // console.error('Signup failed:', error)
+      logMessage(err.message || 'Signup failed.', 'error')
       throw new Error(err.message || 'Signup failed.')
     }
   }

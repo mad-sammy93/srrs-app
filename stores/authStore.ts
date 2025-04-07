@@ -83,24 +83,36 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
-      const response = await $fetch<LoginResponse>('/api/auth/login', {
+      const response = await useFetch<LoginResponse>('/api/auth/login', {
         method: 'POST',
         body: credentials,
       })
+      console.log('login====>', response.error.value?.data?.message);
 
-      if (response.data.isTwoFAEnabled) {
-        tempToken.value = response.data.accessToken
-        return true // Indicates OTP is needed
+      if (response.data.value?.status === 200) {
+        if (response.data.value?.data.isTwoFAEnabled) {
+          tempToken.value = response.data.value.data.accessToken
+          return true // Indicates OTP is needed
+        } else {
+          setTokens(response.data.value.data.accessToken)
+          // console.log(response.data.value?.message);
+          logMessage(response.data.value?.message || 'Login successful', 'success');
+
+          return false // No OTP required, user is logged in
+        }
       } else {
-        setTokens(response.data.accessToken)
-        // console.log(response);
-        logMessage('Login successful', 'success');
-
-        return false // No OTP required, user is logged in
+        logMessage(response.error.value?.data?.message || 'Login failed', 'error');
       }
     } catch (err: any) {
-      logMessage(err.message || 'Login failed.', 'error');
-      throw new Error(err.message || 'Login failed.')
+      // logMessage(err.message || 'Login failed.', 'error');
+      // throw new Error(err.message || 'Login failed.')
+      if (err?.response?._data?.message) {
+        logMessage(err.response._data.message, 'error')
+        // errorMessage = err.response._data.message; // Extract API error message
+      } else if (err?.message) {
+        logMessage(err.message, 'error')
+        // errorMessage = err.message;
+      }
     }
   }
 
@@ -156,8 +168,15 @@ export const useAuthStore = defineStore('auth', () => {
       setTokens(response.data.accessToken)
       tempToken.value = null // Clear temp token
     } catch (err: any) {
-      logMessage(err.message || 'OTP verification failed.', 'error');
-      throw new Error(err.message || 'OTP verification failed.')
+      // logMessage(err.message || 'OTP verification failed.', 'error');
+      // throw new Error(err.message || 'OTP verification failed.')
+      if (err?.response?._data?.message) {
+        logMessage(err.response._data.message, 'error')
+        // errorMessage = err.response._data.message; // Extract API error message
+      } else if (err?.message) {
+        logMessage(err.message, 'error')
+        // errorMessage = err.message;
+      }
     }
   }
 
@@ -165,7 +184,11 @@ export const useAuthStore = defineStore('auth', () => {
   const signup = async (email: string, password: string, fullName: string, otp?: string) => {
     try {
       if (otp) {
-        const response = await $fetch('/api/auth/signup', {
+        const { data, error, status } = await useFetch<{
+          status: number
+          data: { id: number; accessToken: string }
+          message: string
+        }>('/api/auth/signup', {
           method: 'POST',
           body: {
             email,
@@ -174,15 +197,23 @@ export const useAuthStore = defineStore('auth', () => {
             otp,
           },
         })
-
-        if (response) {
-          // alert('Signup successful! Redirecting...')
-          logMessage('Signup successful', 'success')
-          resetAuth() // ✅ Clear store data
+        // console.log(status);
+        console.log('status', status, 'data', data, '[ERROR]', error);
+        if (status.value === 'success') {
+          logMessage(data.value?.message || 'Signup successful', 'success')
+          // resetAuth() // ✅ Clear store data
+          if (data.value?.data?.accessToken) {
+            setTokens(data.value.data.accessToken);
+          }
+          navigateTo('/')
           return true
         }
+        if (status.value === 'error') {
+          logMessage(error.value?.data.message.toString() || 'Signup failed', 'error')
+          return false
+        }
       } else {
-        const response = await $fetch<{
+        const { data, error, status } = await useFetch<{
           status: number
           data: { id: number; qrCode: string }
           message: string
@@ -190,17 +221,29 @@ export const useAuthStore = defineStore('auth', () => {
           method: 'POST',
           body: { email, password, fullName },
         })
-
-        if (response.status === 201) {
-          qrCode.value = response.data.qrCode
+        // return 🍍🍍🍍
+        if (status.value === 'success') {
+          logMessage(data.value?.message || 'Signup successful', 'success',);
+          qrCode.value = data.value?.data?.qrCode || null
           user.value = { email, fullName, password }
           step.value = 2 // ✅ Move to 2FA step
         }
+        if (status.value === 'error') {
+          logMessage(error.value?.data.message.toString() || 'Signup failed', 'error')
+          return false
+        }
       }
     } catch (err: any) {
-      // console.error('Signup failed:', error)
-      logMessage(err.message || 'Signup failed.', 'error')
-      throw new Error(err.message || 'Signup failed.')
+      console.log('[CATCH BLOCK ERROR]', err);
+
+      // logMessage(err.message || 'Signup failed.', 'error');
+      if (err?.response?._data?.message) {
+        logMessage(err.response._data.message, 'error')
+        // errorMessage = err.response._data.message; // Extract API error message
+      } else if (err?.message) {
+        logMessage(err.message, 'error')
+        // errorMessage = err.message;
+      }
     }
   }
 

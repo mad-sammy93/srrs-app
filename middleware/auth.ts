@@ -71,7 +71,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   // Clear tokens and redirect to login if refresh fails or no tokens exist
   // console.log('Redirecting to login...');
-  logMessage('Redirecting to login...', 'warning');
+  // logMessage('Redirecting to login...', 'warning');
   authStore.clearTokens();
   return navigateTo('/auth/login');
 });

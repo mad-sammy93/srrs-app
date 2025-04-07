@@ -4,7 +4,7 @@
       <div
         class="w-full mx-auto max-w-screen-xl p-2 md:flex md:items-center md:justify-center"
       >
-        <span class="text-md text-gray-400 sm:text-center dark:text-white"
+        <span class="text-md text-white sm:text-center dark:text-white"
           >Copyright © 2025
           <a
             href="https://smartshore.com/"

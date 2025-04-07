@@ -17,7 +17,9 @@
       <form @submit.prevent="submitBooking">
         <!-- Agenda -->
         <div class="mb-4">
-          <label class="block font-normal text-gray-500 dark:text-white">Agenda</label>
+          <label class="block font-normal text-gray-500 dark:text-white"
+            >Agenda</label
+          >
           <input
             v-model="form.agenda"
             type="text"
@@ -27,7 +29,9 @@
         </div>
 
         <div class="mb-4">
-          <label class="block mb-2 text-gray-500 dark:text-white">Select Room</label>
+          <label class="block mb-2 text-gray-500 dark:text-white"
+            >Select Room</label
+          >
           <div class="flex flex-wrap gap-2 mb-6">
             <button
               v-for="room in rooms"
@@ -37,7 +41,7 @@
                 form.roomId === room.id ? 'selected-room' : '',
                 getRoomClass(room),
               ]"
-              class="room-btn text-white text-shadow-sm "
+              class="room-btn text-white text-shadow-sm"
               :style="`background: #${room.hexColor}95;border-left: 6px solid #${room.hexColor};border:2px solid #${room.hexColor};`"
               @click.prevent="form.roomId = room.id"
             >
@@ -79,8 +83,13 @@
           "
           @save="handleRecurrence"
         />
-        <div v-if="form.isRecurring" class="text-gray-500 dark:text-white"> 
-          Meeting will repeat every {{ form.frequency }} times {{ checkRecPattern(form.recurrencePatternId) }} {{(form.weekdayId)?`on `+ checkweekday(form.weekdayId):'' }}
+        <div
+          v-if="form.isRecurring"
+          class="text-gray-500 dark:text-white"
+        >
+          Meeting will repeat every {{ form.frequency }} times
+          {{ checkRecPattern(form.recurrencePatternId) }}
+          {{ form.weekdayId ? `on ` + checkweekday(form.weekdayId) : "" }}
         </div>
         <div
           class="grid gap-4"
@@ -90,7 +99,9 @@
           }"
         >
           <div class="mb-4">
-            <label class="block font-normal text-gray-500 dark:text-white">Meeting Date</label>
+            <label class="block font-normal text-gray-500 dark:text-white"
+              >Meeting Date</label
+            >
             <input
               v-model="form.meetingDate"
               type="date"
@@ -112,7 +123,9 @@
             />
           </div>
           <div>
-            <label class="block font-normal text-gray-500 dark:text-white">Start Time</label>
+            <label class="block font-normal text-gray-500 dark:text-white"
+              >Start Time</label
+            >
             <input
               v-model="form.startTime"
               type="time"
@@ -121,7 +134,9 @@
             />
           </div>
           <div>
-            <label class="block font-normal text-gray-500 dark:text-white">End Time</label>
+            <label class="block font-normal text-gray-500 dark:text-white"
+              >End Time</label
+            >
             <input
               v-model="form.endTime"
               type="time"
@@ -130,21 +145,12 @@
             />
           </div>
         </div>
-        <div class="my-4">
-          <label class="block font-normal text-gray-500 dark:text-white">Members / Guest</label>
-          <select
-            v-model="form.memberIds"
-            Multiple
-            class="input-field dark:bg-slate-600 dark:text-white"
-          >
-            <option
-              v-for="member in user"
-              :key="member.id"
-              :value="member.id"
-            >
-              {{ member.fullName }}
-            </option>
-          </select>
+        <div class="my-4 max-w-[1240px]">
+          {{ form.memberIds }}
+          <UIMoleculesMultiSelect
+            :options="formattedOptions"
+            @update:selected="handleSelected"
+          />
         </div>
         <button
           type="submit"
@@ -154,12 +160,6 @@
           {{ loading ? "Booking..." : "Book Meeting" }}
         </button>
       </form>
-      <!-- <p
-        v-if="successMessage"
-        class="text-green-600 mt-4"
-      >
-        {{ successMessage }}
-      </p> -->
       <div class="py-4 mb-5">
         <div class="flex items-center mt-4 space-x-4">
           <div
@@ -168,7 +168,7 @@
             class="flex flex-wrap items-center dark:text-white"
           >
             <span
-              class="w-6 h-6 bg-green-200 mr-2 rounded inline-block "
+              class="w-6 h-6 bg-green-200 mr-2 rounded inline-block"
               :style="`background-color: #${room.hexColor}`"
             ></span
             >{{ room.roomName }} Room
@@ -192,7 +192,7 @@ import { useRoomStore } from "@/stores/roomStore";
 import { useUserStore } from "@/stores/userStore";
 import { useMeetingStore } from "@/stores/meetingStore";
 import { useAuthStore } from "@/stores/authStore";
-import type { FormData } from "@/types";
+import type { FormData, UserDetail } from "@/types";
 
 const authStore = useAuthStore();
 const roomStore = useRoomStore();
@@ -200,7 +200,17 @@ const userStore = useUserStore();
 const meetingStore = useMeetingStore();
 
 const rooms = storeToRefs(roomStore).roomList;
-const user = storeToRefs(userStore).usersList;
+const users = storeToRefs(userStore).usersList;
+
+//Watch  storeToRefs(userStore).usersList and upadte users
+watch(
+  () => userStore.usersList,
+  (newVal) => {
+    console.log("Users updated:", newVal);
+    users.value = newVal;
+  },
+  { immediate: true } // This ensures the watcher triggers immediately
+);
 // const userId = computed(() => authStore.myDetails?.id);
 const weekdays = [
   {
@@ -235,18 +245,33 @@ const weekdays = [
 const loading = ref(false);
 
 onMounted(() => {
-  let params = {
+  let userParams = {
     pageNo: 1,
     limit: 100,
+    userStatusId: 1,
   };
   roomStore.fetchRoomsData();
-  userStore.fetchUsers(params); //fetch all users
+  userStore.fetchUsers(userParams); //fetch all users
 });
 
-const checkweekday = (id: number|undefined) => {
+
+
+const handleSelected = (newSelected: UserDetail[]) => {
+  // Ensure only IDs are stored in form.memberIds
+  form.value.memberIds = newSelected.map((member: any) => member.id);
+  console.log("Selected member IDs:", form.value.memberIds);
+};
+
+const checkweekday = (id: number | undefined) => {
   const day = weekdays.find((day) => day.id === id);
   return day?.name;
-}
+};
+
+const formattedOptions = users.value?.map((user: any) => ({
+  label: `${user.fullName} (${user.email})`,
+  id: user.id,
+  value: user.email,
+}));
 
 const showRecurrenceModal = ref(false);
 // Handle recurrence data
@@ -292,53 +317,53 @@ const recurrencePatterns = ref([
 
 const checkRecPattern = (id: number | undefined) => {
   if (id === 1) {
-    return 'weekly'
+    return "weekly";
   }
   if (id === 0) {
-    return 'daily'
+    return "daily";
   }
   if (id === 2) {
-    return 'monthly'
+    return "monthly";
   }
-  return ''
-}
+  return "";
+};
 const validateForm = () => {
   form.value.recurrencePatternId = form.value.recurrencePatternId
     ? Number(form.value.recurrencePatternId)
     : undefined;
 
   if (!form.value.agenda || form.value.agenda.length > 40) {
-    logMessage("Agenda must be between 1 to 40 characters.","error");
+    logMessage("Agenda must be between 1 to 40 characters.", "error");
     return false;
   }
   if (
     !form.value.meetingDate ||
     !/^\d{4}-\d{2}-\d{2}$/.test(form.value.meetingDate)
   ) {
-    logMessage("Meeting Date must be in YYYY-MM-DD format.","error");
+    logMessage("Meeting Date must be in YYYY-MM-DD format.", "error");
     return false;
   }
   if (!form.value.startTime || !/^\d{2}:\d{2}$/.test(form.value.startTime)) {
-    logMessage("Start Time must be in HH:MM (24-hour) format.","error");
+    logMessage("Start Time must be in HH:MM (24-hour) format.", "error");
     return false;
   }
   if (!form.value.endTime || !/^\d{2}:\d{2}$/.test(form.value.endTime)) {
-    logMessage("End Time must be in HH:MM (24-hour) format.","error");
+    logMessage("End Time must be in HH:MM (24-hour) format.", "error");
     return false;
   }
   if (!form.value.roomId || isNaN(Number(form.value.roomId))) {
-    logMessage("Please select a valid room.","error");
+    logMessage("Please select a valid room.", "error");
     return false;
   }
 
   // Recurrence validation
   if (form.value.isRecurring) {
     if (!form.value.recurrencePatternId) {
-      logMessage("Please select a recurrence pattern.","error");
+      logMessage("Please select a recurrence pattern.", "error");
       return false;
     }
     if (form.value.recurrencePatternId === 2 && !form.value.weekdayId) {
-      logMessage("Please select a weekday for weekly recurrence.","error");
+      logMessage("Please select a weekday for weekly recurrence.", "error");
       return false;
     }
     // if (form.value.recurrencePatternId === 1 ) {
@@ -347,13 +372,13 @@ const validateForm = () => {
     //   return false;
     // }
     // }
-    
+
     if (!form.value.meetingEndDate) {
-      logMessage("Please select a meeting end date for recurrence.","error");
+      logMessage("Please select a meeting end date for recurrence.", "error");
       return false;
     }
     if (form.value.meetingEndDate <= form.value.meetingDate) {
-      logMessage("Meeting end date must be after the start date.","error");
+      logMessage("Meeting end date must be after the start date.", "error");
       return false;
     }
   }
@@ -390,20 +415,23 @@ const submitBooking = async () => {
     const { data, error } = await meetingStore.bookMeetingRoom(bookingData);
 
     if (error) {
-      logMessage(error, 'error'); // Log error
+      logMessage(error, "error"); // Log error
       // logger.value.message = error; // Display error message from API
       // logger.value.type = "error";
     } else {
       // logger.value.message = data?.message || "Meeting room booked successfully";
       // logger.value.type = "success";
-      logMessage(data?.message || "Meeting room booked successfully", 'success');
+      logMessage(
+        data?.message || "Meeting room booked successfully",
+        "success"
+      );
       navigateTo("/dashboard/my-bookings");
     }
   } catch (err: any) {
     // console.error("Unexpected Error:", err); // Log unexpected errors
     // logger.value.message = err.message || "An unexpected error occurred";
     // logger.value.type = "error";
-    logMessage(err.message || "An unexpected error occurred", 'error');
+    logMessage(err.message || "An unexpected error occurred", "error");
   } finally {
     loading.value = false;
   }

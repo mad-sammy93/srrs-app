@@ -9,7 +9,7 @@
         >
           <NuxtLink
             :to="item.link"
-            class="p-2 py-5 text-xs w-full text-center flex-wrap flex flex-col items-center"
+            class="p-2 py-5 text-xs w-full text-center flex-wrap flex flex-col items-center text-white "
           >
             <component
               :is="item.icon"

@@ -217,7 +217,7 @@
       <button
         @click="prevPage"
         :disabled="currentPage === 1"
-        class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50"
+        class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 dark:bg-blue-500"
       >
         Previous
       </button>

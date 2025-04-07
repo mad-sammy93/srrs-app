@@ -53,6 +53,8 @@
       </p> -->
 
       <!-- Login / Verify OTP Button -->
+
+      <div class="flex flex-col gap-3"> 
       <button
         type="submit"
         :disabled="loading"
@@ -60,6 +62,12 @@
       >
         {{ loading ? "Processing..." : showOtpScreen ? "Verify OTP" : "Sign In" }}
       </button>
+
+      <NuxtLink
+        to="/auth/signup"
+        class="text-sm text-center font-medium text-gray-500 hover:underline dark:text-gray-400"
+        >Don't have an account? Sign up</NuxtLink>
+        </div>  
       <!-- Google Sign-In Button -->
       
       <hr class="my-[40px] border-gray-700">
@@ -74,10 +82,6 @@
         </svg>
         Sign in with Google
       </button>
-      <NuxtLink
-        to="/auth/signup"
-        class="text-sm text-center font-medium text-gray-500 hover:underline dark:text-gray-400"
-        >Don't have an account? Sign up</NuxtLink>
     </form>
   </div>
 </template>

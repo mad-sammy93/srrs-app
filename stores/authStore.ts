@@ -197,11 +197,8 @@ export const useAuthStore = defineStore('auth', () => {
             otp,
           },
         })
-        // console.log(status);
-        console.log('status', status, 'data', data, '[ERROR]', error);
         if (status.value === 'success') {
           logMessage(data.value?.message || 'Signup successful', 'success')
-          // resetAuth() // ✅ Clear store data
           if (data.value?.data?.accessToken) {
             setTokens(data.value.data.accessToken);
           }
@@ -234,15 +231,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
     } catch (err: any) {
-      console.log('[CATCH BLOCK ERROR]', err);
-
-      // logMessage(err.message || 'Signup failed.', 'error');
       if (err?.response?._data?.message) {
         logMessage(err.response._data.message, 'error')
-        // errorMessage = err.response._data.message; // Extract API error message
       } else if (err?.message) {
         logMessage(err.message, 'error')
-        // errorMessage = err.message;
       }
     }
   }

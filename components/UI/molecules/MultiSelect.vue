@@ -1,14 +1,17 @@
 <template>
   <div class="relative">
+    <label class="block font-normal text-gray-500 dark:text-white"
+      >Members / Guest</label
+    >
     <div
-      class="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+      class="group rounded-sm border-gray-300 border border-input px-3 py-2 text-md ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0"
       @keydown="handleKeyDown"
     >
       <div class="flex flex-wrap gap-1">
         <span
           v-for="option in selected"
           :key="option.value"
-          class="inline-flex items-center rounded-full bg-gray-200 px-2 py-1 text-sm"
+          class="inline-flex items-center rounded-full bg-gray-200 px-2 py-3 text-lg"
         >
           {{ option.label }}
           <button
@@ -34,7 +37,7 @@
 
       <ul
         v-if="open && filteredOptions.length > 0"
-        class="absolute left-0 top-[38px] z-10 mt-1 w-full rounded-md border bg-white shadow-lg overflow-y-scroll max-h-[200px]"
+        class="absolute left-0 top-[57px] z-10 mt-1 w-full rounded-md border bg-white shadow-lg overflow-y-scroll max-h-[200px]"
       >
         <li
           v-for="option in filteredOptions"
@@ -61,20 +64,14 @@ const props = defineProps({
     validator: (opts) =>
       Array.isArray(opts) &&
       opts.every(
-        (o) => typeof o.label === "string" && typeof o.value === "number" && typeof o.value === "string"
+        (o) =>
+          typeof o.label === "string" &&
+          typeof o.value === "number" &&
+          typeof o.value === "string"
       ),
   },
 });
 
-// watch(
-//   () => props.options,
-//   (newOptions) => {
-//     // Optional: Reset input or re-validate selected if needed
-    
-//     console.log("Options updated:", newOptions);
-//   },
-//   { deep: true, immediate: true }
-// );
 const emit = defineEmits(["update:selected"]);
 
 const inputRef = ref(null);

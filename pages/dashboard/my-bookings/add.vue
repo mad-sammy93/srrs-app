@@ -83,14 +83,14 @@
           "
           @save="handleRecurrence"
         />
-        <div
+        <!-- <div
           v-if="form.isRecurring"
           class="text-gray-500 dark:text-white"
         >
-          Meeting will repeat every {{ form.frequency }} times
+          Meeting will repeat {{ form.frequency }} times
           {{ checkRecPattern(form.recurrencePatternId) }}
           {{ form.weekdayId ? `on ` + checkweekday(form.weekdayId) : "" }}
-        </div>
+        </div> -->
         <div
           class="grid gap-4"
           :class="{
@@ -146,7 +146,6 @@
           </div>
         </div>
         <div class="my-4 max-w-[1240px]">
-          {{ form.memberIds }}
           <UIMoleculesMultiSelect
             :options="formattedOptions"
             @update:selected="handleSelected"
@@ -211,7 +210,6 @@ watch(
   },
   { immediate: true } // This ensures the watcher triggers immediately
 );
-// const userId = computed(() => authStore.myDetails?.id);
 const weekdays = [
   {
     id: 1,
@@ -253,8 +251,6 @@ onMounted(() => {
   roomStore.fetchRoomsData();
   userStore.fetchUsers(userParams); //fetch all users
 });
-
-
 
 const handleSelected = (newSelected: UserDetail[]) => {
   // Ensure only IDs are stored in form.memberIds

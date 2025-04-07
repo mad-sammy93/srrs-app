@@ -28,15 +28,15 @@
 defineProps({
   width: {
     type: String,
-    default: '350',
+    default: "350",
   },
   height: {
     type: String,
-    default: '70',
+    default: "70",
   },
   color: {
     type: String,
-    default: '#888888',
-  },  
-})
+    default: "#888888",
+  },
+});
 </script>

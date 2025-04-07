@@ -12,12 +12,14 @@
       <h1 class="text-4xl font-light mb-4 dark:text-white">Edit Booking</h1>
     </div>
     <div
-      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[50px] bg-white  dark:bg-slate-800  shadow-md rounded-lg"
+      class="min-w-[1440px] mx-auto px-[100px] py-[50px] mt-[50px] bg-white dark:bg-slate-800 shadow-md rounded-lg"
     >
       <form @submit.prevent="submitEdit">
         <!-- Agenda -->
         <div class="mb-4">
-          <label class="block font-normal text-gray-500 dark:text-white">Agenda</label>
+          <label class="block font-normal text-gray-500 dark:text-white"
+            >Agenda</label
+          >
           <input
             v-model="form.agenda"
             type="text"
@@ -49,7 +51,9 @@
 
         <!-- Select Room -->
         <div class="mb-4">
-          <label class="block mb-2 text-gray-500 dark:text-white">Select Room</label>
+          <label class="block mb-2 text-gray-500 dark:text-white"
+            >Select Room</label
+          >
           <div class="flex flex-wrap gap-2 mb-6">
             <button
               v-for="room in rooms"
@@ -125,14 +129,20 @@
           "
           @save="handleRecurrence"
         />
-        <div v-if="form.isRecurring">
-          {{ form.recurrencePatternId }} -- until {{ form.frequency }} --
-          weekday: {{ form.weekdayId }}
+        <div
+          v-if="form.isRecurring"
+          class="text-gray-500 dark:text-white hidden"
+        >
+          Meeting will repeat every {{ form.frequency }} times
+          {{ checkRecPattern(form.recurrencePatternId) }}
+          {{ form.weekdayId ? `on ` + checkweekday(form.weekdayId) : "" }}
         </div>
         <!-- Meeting Date, Time and Members -->
         <div class="grid grid-cols-3 gap-4">
           <div>
-            <label class="block font-normal text-gray-500 dark:text-white">Meeting Date</label>
+            <label class="block font-normal text-gray-500 dark:text-white"
+              >Meeting Date</label
+            >
             <input
               v-model="form.meetingDate"
               type="date"
@@ -163,7 +173,9 @@
             </div>
           </div>
           <div>
-            <label class="block font-normal text-gray-500 dark:text-white">Start Time</label>
+            <label class="block font-normal text-gray-500 dark:text-white"
+              >Start Time</label
+            >
             <input
               v-model="form.startTime"
               type="time"
@@ -194,11 +206,13 @@
             </div>
           </div>
           <div>
-            <label class="block font-normal text-gray-500 dark:text-white">End Time</label>
+            <label class="block font-normal text-gray-500 dark:text-white"
+              >End Time</label
+            >
             <input
               v-model="form.endTime"
               type="time"
-              class="input-field dark:bg-slate-600 dark:text-white"
+              class="input-field dark:bg-slate-600 dark:text-white ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
               required
               v-show="!loading"
             />
@@ -225,73 +239,30 @@
             </div>
           </div>
         </div>
-        <div class="my-4">
-          <label class="block font-normal text-gray-500 dark:text-white">Members / Guest</label>
-          <select
-            v-model="form.memberIds"
-            multiple
-            class="input-field dark:bg-slate-600 dark:text-white"
+        <div class="my-4 max-w-[1240px]">
+          <UIMoleculesMultiSelect
+            :options="formattedOptions"
+            @update:selected="handleSelected"
             v-show="!loading"
-          >
-            <option
-              v-for="member in user"
-              :key="member.id"
-              :value="member.id"
-            >
-              {{ member.fullName }}
-            </option>
-          </select>
+          />
 
           <div
             role="status"
-            class="space-y-2.5 animate-pulse max-w-lg"
+            class="space-y-2.5 animate-pulse max-w-full"
             v-show="loading"
           >
             <div
               class="flex items-center w-full border rounded border-gray-600 p-3 flex-wrap"
             >
-              <div class="flex items-center w-full">
-                <div
-                  class="h-2.5 mb-2 bg-gray-200 rounded-full dark:bg-gray-700 w-32"
-                ></div>
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                ></div>
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                ></div>
-              </div>
-              <div class="flex items-center w-full max-w-[480px]">
-                <div
-                  class="h-2.5 mb-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                ></div>
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                ></div>
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
-                ></div>
-              </div>
               <div class="flex items-center w-full max-w-[400px]">
                 <div
-                  class="h-2.5 mb-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
+                  class="h-5 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
                 ></div>
                 <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
+                  class="h-5 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-80"
                 ></div>
                 <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                ></div>
-              </div>
-              <div class="flex items-center w-full max-w-[480px]">
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-200 rounded-full dark:bg-gray-700 w-full"
-                ></div>
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
-                ></div>
-                <div
-                  class="h-2.5 mb-2 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-24"
+                  class="h-5 ms-2 bg-gray-300 rounded-full dark:bg-gray-600 w-full"
                 ></div>
               </div>
             </div>
@@ -367,8 +338,12 @@
         class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center"
       >
         <div class="bg-white dark:bg-slate-900 p-6 rounded-lg shadow-lg w-96">
-          <h3 class="text-lg font-semibold mb-4 dark:text-white">Apply Changes</h3>
-          <p class="text-gray-600 mb-4 dark:text-gray-300">Do you want to apply the changes to:</p>
+          <h3 class="text-lg font-semibold mb-4 dark:text-white">
+            Apply Changes
+          </h3>
+          <p class="text-gray-600 mb-4 dark:text-gray-300">
+            Do you want to apply the changes to:
+          </p>
 
           <div
             class="flex flex-col gap-3"
@@ -413,7 +388,11 @@ import { useRoomStore } from "@/stores/roomStore";
 import { useUserStore } from "@/stores/userStore";
 import { useMeetingStore } from "@/stores/meetingStore";
 import { useRoute } from "vue-router";
-import type { FormData, EditBookedMeetingRoomFormData } from "@/types";
+import type {
+  FormData,
+  UserDetail,
+  EditBookedMeetingRoomFormData,
+} from "@/types";
 
 const roomStore = useRoomStore();
 const userStore = useUserStore();
@@ -423,18 +402,38 @@ const confirmModalVisible = ref(false);
 const selectedOption = ref("");
 
 const rooms = storeToRefs(roomStore).roomList;
-const user = storeToRefs(userStore).usersList;
+const users = storeToRefs(userStore).usersList;
 const loading = ref(false);
 const weekdays = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
+  {
+    id: 1,
+    name: "Sunday",
+  },
+  {
+    id: 2,
+    name: "Monday",
+  },
+  {
+    id: 3,
+    name: "Tuesday",
+  },
+  {
+    id: 4,
+    name: "Wednesday",
+  },
+  {
+    id: 5,
+    name: "Thursday",
+  },
+  {
+    id: 6,
+    name: "Friday",
+  },
+  {
+    id: 7,
+    name: "Saturday",
+  },
 ];
-
 const route = useRoute();
 const meetingId = Number(route.params.id);
 const form = ref<FormData>({
@@ -470,7 +469,7 @@ onMounted(async () => {
       logMessage("Booking not found.", "error");
       setTimeout(() => {
         logMessage("Redirecting to dashboard", "info");
-        navigateTo('/dashboard/my-bookings')
+        navigateTo("/dashboard/my-bookings");
       }, 2000);
     }
     if (meeting) {
@@ -509,6 +508,33 @@ const handleRecurrence = (options: any) => {
   showRecurrenceModal.value = false;
 };
 
+const checkRecPattern = (id: number | undefined) => {
+  if (id === 1) {
+    return "weekly";
+  }
+  if (id === 0) {
+    return "daily";
+  }
+  if (id === 2) {
+    return "monthly";
+  }
+  return "";
+};
+const handleSelected = (newSelected: UserDetail[]) => {
+  // Ensure only IDs are stored in form.memberIds
+  form.value.memberIds = newSelected.map((member: any) => member.id);
+  console.log("Selected member IDs:", form.value.memberIds);
+};
+const formattedOptions = users.value?.map((user: any) => ({
+  label: `${user.fullName} (${user.email})`,
+  id: user.id,
+  value: user.email,
+}));
+
+const checkweekday = (id: number | undefined) => {
+  const day = weekdays.find((day) => day.id === id);
+  return day?.name;
+};
 const validateForm = () => {
   form.value.recurrencePatternId = form.value.recurrencePatternId
     ? Number(form.value.recurrencePatternId)
@@ -657,7 +683,7 @@ useHead({ title: "Edit Booking" });
   margin-top: 4px;
 }
 .btn-primary {
-  background-color: #35464D;
+  background-color: #35464d;
   color: white;
   padding: 8px 12px;
   border-radius: 4px;

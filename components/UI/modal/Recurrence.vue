@@ -1,38 +1,88 @@
 <template>
   <div
     v-if="show"
-    class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50"
+    class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-10"
   >
     <div class="bg-white p-6 rounded-lg shadow-lg w-96">
       <h2 class="text-xl font-semibold mb-4">Recurrence Options</h2>
 
       <label class="block font-normal text-gray-500">Recurrence Pattern</label>
-      <select v-model="recurrencePatternId" class="input-field">
-        <option v-for="pattern in recurrencePatterns" :key="pattern.id" :value="pattern.id">
+      <select
+        v-model="recurrencePatternId"
+        class="input-field"
+      >
+        <option
+          v-for="pattern in recurrencePatterns"
+          :key="pattern.id"
+          :value="pattern.id"
+        >
           {{ pattern.name }}
         </option>
       </select>
-      <p v-if="errors.recurrencePattern" class="text-red-500 text-sm">{{ errors.recurrencePattern }}</p>
+      <p
+        v-if="errors.recurrencePattern"
+        class="text-red-500 text-sm"
+      >
+        {{ errors.recurrencePattern }}
+      </p>
 
-      <div v-if="recurrencePatternId !== 0" class="mt-4">
+      <div
+        v-if="recurrencePatternId !== 0"
+        class="mt-4"
+      >
         <label class="block font-normal text-gray-500">Frequency</label>
-        <input v-model.number="frequency" type="number" min="1" class="input-field" />
-        <p v-if="errors.frequency" class="text-red-500 text-sm">{{ errors.frequency }}</p>
+        <input
+          v-model.number="frequency"
+          type="number"
+          min="1"
+          class="input-field"
+        />
+        <p
+          v-if="errors.frequency"
+          class="text-red-500 text-sm"
+        >
+          {{ errors.frequency }}
+        </p>
       </div>
 
-      <div v-if="recurrencePatternId === 2" class="mt-4">
+      <div
+        v-if="recurrencePatternId === 2"
+        class="mt-4"
+      >
         <label class="block font-normal text-gray-500">Select Weekday</label>
-        <select v-model="weekdayId" class="input-field">
-          <option v-for="(day, index) in weekdays" :key="index" :value="index + 1">
+        <select
+          v-model="weekdayId"
+          class="input-field"
+        >
+          <option
+            v-for="(day, index) in weekdays"
+            :key="index"
+            :value="index + 1"
+          >
             {{ day }}
           </option>
         </select>
-        <p v-if="errors.weekday" class="text-red-500 text-sm">{{ errors.weekday }}</p>
+        <p
+          v-if="errors.weekday"
+          class="text-red-500 text-sm"
+        >
+          {{ errors.weekday }}
+        </p>
       </div>
 
       <div class="flex justify-end space-x-2 mt-6">
-        <button @click="$emit('close')" class="btn-secondary">Cancel</button>
-        <button @click="validateAndSave" class="btn-primary">Save</button>
+        <button
+          @click="$emit('close')"
+          class="btn-secondary"
+        >
+          Cancel
+        </button>
+        <button
+          @click="validateAndSave"
+          class="btn-primary"
+        >
+          Save
+        </button>
       </div>
     </div>
   </div>
@@ -80,7 +130,10 @@ const validateAndSave = () => {
     valid = false;
   }
 
-  if (recurrencePatternId.value !== 0 && (!frequency.value || frequency.value < 1)) {
+  if (
+    recurrencePatternId.value !== 0 &&
+    (!frequency.value || frequency.value < 1)
+  ) {
     errors.value.frequency = "Frequency must be at least 1.";
     valid = false;
   }

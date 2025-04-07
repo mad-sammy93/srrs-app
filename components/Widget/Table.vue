@@ -1,6 +1,9 @@
 <template>
   <div>
-    <UIModalLogger :message="logger.message" :type="logger.type"/>
+    <UIModalLogger
+      :message="logger.message"
+      :type="logger.type"
+    />
     <div class="overflow-x-auto min-w-[1440px]">
       <div class="flex justify-between items-center mb-4">
         <!-- paginatedMeetings: {{ paginatedMeetings }} -->
@@ -31,7 +34,9 @@
         class="min-w-full bg-white border dark:bg-slate-800 dark:text-white border-gray-300 text-gray-500"
         v-if="!loading"
       >
-        <thead class="bg-white font-extrabold text-gray-700 dark:bg-slate-900 dark:text-white">
+        <thead
+          class="bg-white font-extrabold text-gray-700 dark:bg-slate-900 dark:text-white"
+        >
           <tr>
             <!-- <th class="p-3 border">ID</th> -->
             <th class="p-3 border">Room Name</th>
@@ -52,7 +57,9 @@
             class="hover:bg-gray-100 font-normal dark:hover:text-black"
           >
             <td class="p-3 border text-center">{{ meeting.room.roomName }}</td>
-            <td class="p-3 border text-center">{{ meeting.startDateTime.slice(0, 10) }}</td>
+            <td class="p-3 border text-center">
+              {{ meeting.startDateTime.slice(0, 10) }}
+            </td>
             <td class="p-3 border text-center">
               {{
                 new Date(meeting.startDateTime).toLocaleTimeString("en-GB", {
@@ -95,21 +102,28 @@
                 class="text-blue-600 hover:underline mr-2"
                 @click="$emit('edit', meeting)"
               >
-                <UIAtomsIconsEditBooking :color="`#60a5fa`"/>
+                <UIAtomsIconsEditBooking :color="`#60a5fa`" />
               </button>
               <button
                 class="text-red-600 hover:underline"
                 @click="confirmDelete(meeting)"
                 :disabled="meetingStatus[index] !== 'Upcoming'"
               >
-                <UIAtomsIconsDeleteBooking :color="meetingStatus[index] !== 'Upcoming' ? 'gray' : 'red'"/>
+                <UIAtomsIconsDeleteBooking
+                  :color="meetingStatus[index] !== 'Upcoming' ? 'gray' : 'red'"
+                />
               </button>
             </td>
           </tr>
         </tbody>
       </table>
-      <table class="min-w-full bg-white border border-gray-300 text-gray-500 dark:bg-slate-800 dark:text-white" v-else>
-        <thead class="bg-white font-extrabold text-gray-700  dark:bg-slate-900 dark:text-white">
+      <table
+        class="min-w-full bg-white border border-gray-300 text-gray-500 dark:bg-slate-800 dark:text-white"
+        v-else
+      >
+        <thead
+          class="bg-white font-extrabold text-gray-700 dark:bg-slate-900 dark:text-white"
+        >
           <tr>
             <!-- <th class="p-3 border">ID</th> -->
             <th class="p-3 border">Room Name</th>
@@ -247,10 +261,10 @@ const logger = ref({
   message: "" as string | undefined,
   type: "error",
   duration: 3000,
-})
+});
 
 const confirmDelete = (meeting: Meeting) => {
-  if(!meetingStatus.value.includes('Upcoming')) return noDeleteMeeting();
+  if (!meetingStatus.value.includes("Upcoming")) return noDeleteMeeting();
   selectedMeeting.value = meeting;
   showDeleteModal.value = true;
   deleteOption.value = "SELECTED";
@@ -269,13 +283,12 @@ const deleteMeeting = () => {
 };
 const noDeleteMeeting = () => {
   disabledDelete.value = true;
-  logger.value.message = 'Cannot delete meeting';
-  logger.value.type = 'warning';
+  logger.value.message = "Cannot delete meeting";
+  logger.value.type = "warning";
   setTimeout(() => {
     disabledDelete.value = false;
   }, 2000);
-
-}
+};
 const props = defineProps({
   meetings: {
     type: Array as () => Meeting[],
@@ -320,9 +333,9 @@ const totalPages = computed(() => props.totalPages);
 watch(
   () => props.totalPages,
   (newTotalPages, oldTotalPages) => {
-  //   logMessage(
-  //     `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
-  //   ,'info');
+    //   logMessage(
+    //     `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
+    //   ,'info');
   }
 );
 

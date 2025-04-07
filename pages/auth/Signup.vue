@@ -17,7 +17,7 @@
           <input
             type="email"
             id="email"
-            v-model="email"
+            v-model.trim="email"
             class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light outline-none"
             required
           />
@@ -31,7 +31,7 @@
           <input
             type="password"
             id="password"
-            v-model="password"
+            v-model.trim="password"
             class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light outline-none"
             required
           />
@@ -45,7 +45,7 @@
           <input
             type="text"
             id="fullName"
-            v-model="fullName"
+            v-model.trim="fullName"
             class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light outline-none"
             required
           />
@@ -107,7 +107,7 @@
           <input
             type="number"
             id="otp"
-            v-model="otp"
+            v-model.number="otp"
             class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 dark:shadow-xs-light"
             required
           />
@@ -165,7 +165,6 @@
     </form>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -189,18 +188,33 @@ const cancelOtp = () => {
   authStore.step = 1;
 };
 
+const sanitizeInput = (input: string) => {
+  const element = document.createElement("div");
+  element.innerText = input;
+  return element.innerHTML; // This will escape any HTML characters
+};
+
 // Step 1: Handle Signup
 const handleSignup = async () => {
   loading.value = true;
   // errorMessage.value = undefined
 
   try {
+    const sanitizedEmail = sanitizeInput(email.value);
+    const sanitizedPassword = sanitizeInput(password.value);
+    const sanitizedFullName = sanitizeInput(fullName.value);
+
+    // You can also validate the email format here
+    if (!/\S+@\S+\.\S+/.test(sanitizedEmail)) {
+      logMessage("Invalid email address.", "error");
+      return;
+    }
     const response = await authStore.signup(
-      email.value,
-      password.value,
-      fullName.value
+      sanitizedEmail,
+      sanitizedPassword,
+      sanitizedFullName
     );
-    //  console.log('response',response);
+    console.log("response", response);
 
     // if (data.value?.status === 200) {
     //   authStore.step = 2
@@ -234,15 +248,21 @@ const handleGoogleSignup = async () => {
 
 // Step 2: Verify OTP
 const handleOTP = async () => {
+  const sanitizedOtp = sanitizeInput(String(otp.value));
+
+  if (sanitizedOtp.length !== 6 || isNaN(Number(sanitizedOtp))) {
+    logMessage("Invalid OTP. Please enter a valid 6-digit OTP.", "error");
+    return;
+  }
   const success = await authStore.signup(
     email.value,
     password.value,
     fullName.value,
-    String(otp.value)
+    sanitizedOtp
   );
   if (success) {
     logMessage("Signup successful.", "success");
-    router.push("/auth/login");
+    router.push("/");
   }
 };
 </script>

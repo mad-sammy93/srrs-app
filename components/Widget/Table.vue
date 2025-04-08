@@ -13,20 +13,151 @@
         >
           {{ title }}
         </h3>
-        <div class="filter">
-          <input
-            type="text"
-            :value="filter"
-            @input="updateFilter($event)"
-            placeholder="Search..."
-            class="p-2 border border-gray-300 rounded-md"
-          />
-          <button
+        <div class="flex justify-between gap-2">
+          <div class="filter">
+            <input
+              type="text"
+              :value="filter.searchTerm"
+              @input="updateFilter($event, 'searchTerm')"
+              placeholder="Search by Meeting agenda or Room Name"
+              class="p-2 border border-gray-300 rounded-md"
+            />
+            <!-- <button
             class="p-2 ml-2 bg-blue-500 text-white rounded-md"
-            @click="searchMeetings(filter)"
+            @click="searchMeetings(filter.searchTerm)"
           >
             Search
-          </button>
+          </button> -->
+          </div>
+          <!-- Filter Button + Accordion -->
+          <div class="relative">
+            <button
+              @click="showFilter = !showFilter"
+              class="px-4 py-2 border rounded-md bg-white dark:bg-slate-900 dark:text-white"
+            >
+              Filter
+            </button>
+
+            <div
+              v-if="showFilter"
+              class="absolute z-10 right-0 mt-2 w-64 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-4"
+            >
+              <!-- Accordion Group -->
+              <div>
+                <!-- Room Name -->
+                <div class="mb-2">
+                  <button
+                    @click="toggleAccordion('roomFilter')"
+                    class="w-full flex justify-between items-center font-semibold"
+                  >
+                    Room Name
+                    <span>{{ openAccordion.roomFilter ? "−" : "+" }}</span>
+                  </button>
+                  <div
+                    v-show="openAccordion.roomFilter"
+                    class="mt-2 pl-2"
+                  >
+                    <select
+                      v-model="filters.roomId"
+                      class="border rounded w-full p-1"
+                    >
+                      <option value="">All Rooms</option>
+                      <option
+                        v-for="room in uniqueRooms"
+                        :key="room.roomId"
+                        :value="room.roomId"
+                      >
+                        {{ room.roomName }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- fromDate -->
+                <div class="mb-2">
+                  <button
+                    @click="toggleAccordion('fromDate')"
+                    class="w-full flex justify-between items-center font-semibold"
+                  >
+                    Date
+                    <span>{{ openAccordion.fromDate ? "−" : "+" }}</span>
+                  </button>
+                  <div
+                    v-show="openAccordion.fromDate"
+                    class="mt-2 pl-2"
+                  >
+                    <input
+                      type="date"
+                      v-model="filters.fromDate"
+                      class="border rounded p-1 w-full"
+                    />
+                  </div>
+                </div>
+
+                <!-- toDate -->
+                <div class="mb-2">
+                  <button
+                    @click="toggleAccordion('toDate')"
+                    class="w-full flex justify-between items-center font-semibold"
+                  >
+                    Date
+                    <span>{{ openAccordion.toDate ? "−" : "+" }}</span>
+                  </button>
+                  <div
+                    v-show="openAccordion.toDate"
+                    class="mt-2 pl-2"
+                  >
+                    <input
+                      type="date"
+                      v-model="filters.toDate"
+                      class="border rounded p-1 w-full"
+                    />
+                  </div>
+                </div>
+
+                <!-- Status -->
+                <div class="mb-2">
+                  <button
+                    @click="toggleAccordion('status')"
+                    class="w-full flex justify-between items-center font-semibold"
+                  >
+                    Status
+                    <span>{{ openAccordion.status ? "−" : "+" }}</span>
+                  </button>
+                  <div
+                    v-show="openAccordion.status"
+                    class="mt-2 pl-2"
+                  >
+                    <select
+                      v-model="filters.status"
+                      class="border rounded w-full p-1"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="Upcoming">Upcoming</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="flex justify-between mt-4">
+                  <button
+                    @click="clearFilters"
+                    class="px-3 py-1 text-gray-600 rounded-md border"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    @click="applyFilters"
+                    class="px-3 py-1 bg-blue-500 text-white rounded-md"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -299,8 +430,14 @@ const props = defineProps({
     required: true,
   },
   filter: {
-    type: String,
-    default: "",
+    type: Object as () => {
+      searchTerm: string;
+      roomId: number;
+      status: string;
+      fromDate: string;
+      toDate: string;
+    },
+    required: true,
   },
   currentPage: {
     type: Number,
@@ -350,17 +487,19 @@ watch(
 
 // Computed: Meetings for the current page
 const paginatedMeetings = computed(() => props.meetings);
-
-const updateFilter = (event: Event) => {
+interface Filters {
+  [key: string]: string | number;
+}
+const updateFilter = (event: Event, filterKey: keyof typeof filters.value) => {
   const target = event.target as HTMLInputElement | null;
   if (target) {
-    emit("update:filter", target.value);
+    filters.value[filterKey] = target.value; // Safely update the filter value
   }
 };
 
-const searchMeetings = (searchTerm: string) => {
-  emit("searchMeetings", searchTerm);
-};
+// const searchMeetings = (searchTerm: string) => {
+//   emit("searchMeetings", searchTerm);
+// };
 
 // Pagination controls
 const prevPage = () => {
@@ -370,6 +509,7 @@ const prevPage = () => {
 };
 
 const nextPage = () => {
+
   if (props.currentPage < props.totalPages) {
     emit("fetchPageData", props.currentPage + 1);
   }
@@ -385,6 +525,59 @@ const meetingStatus = computed(() => {
     if (now < startDate) return "Upcoming";
     if (now >= startDate && now < endDate) return "In Progress";
     return "Completed";
+  });
+});
+
+const showFilter = ref(false);
+const openAccordion = ref({
+  roomFilter: true,
+  fromDate: false,
+  toDate: false,
+  status: false,
+});
+
+// Define filters type to allow dynamic keys with string values
+const filters = ref<Filters>({
+  searchTerm: "",
+  roomId: 0,
+  status: "",
+  fromDate: "",
+  toDate: "",
+});
+
+const toggleAccordion = (section: keyof typeof openAccordion.value) => {
+  openAccordion.value[section] = !openAccordion.value[section];
+};
+
+const clearFilters = () => {
+  filters.value = {
+    roomId: 0,
+    status: "",
+    fromDate: "",
+    toDate: "",
+  };
+  applyFilters();
+};
+
+const applyFilters = () => {
+  const activeFilters = {
+    roomId: filters.value.roomId,
+    status: filters.value.status,
+    fromDate: filters.value.fromDate,
+    toDate: filters.value.toDate,
+  };
+
+  emit("searchMeetings", activeFilters); // Emit the filter values to parent
+};
+
+const uniqueRooms = computed(() => {
+  return Array.from(
+    new Set(props.meetings.map((m) => m.room.id)) // Ensure no duplicate room IDs
+  ).map((roomId) => {
+    return {
+      roomId,
+      roomName: props.meetings.find((m) => m.room.id === roomId)?.room.roomName,
+    };
   });
 });
 </script>

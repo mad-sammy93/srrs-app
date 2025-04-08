@@ -5,15 +5,15 @@
         <li
           v-for="item in menuItems"
           :key="item.name"
-          class="flex flex-column hover:bg-gray-700 "
+          class="flex flex-column hover:bg-gray-700 items-center align-middle"
         >
           <NuxtLink
             :to="item.link"
-            class="p-2 py-5 text-xs w-full text-center flex-wrap flex flex-col items-center text-white "
+            class="p-2 py-5 text-xs w-full text-center flex-wrap flex flex-col gap-2 items-center align-middle text-white "
           >
             <component
               :is="item.icon"
-              class="w-5 h-5 mb-2"
+              class="w-6 h-6 mb-2"
             />
             {{ item.name }}
           </NuxtLink>

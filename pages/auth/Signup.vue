@@ -188,6 +188,10 @@ const cancelOtp = () => {
   authStore.step = 1;
 };
 
+const sanitizeName = (input: string) => {
+  // Remove non-alphanumeric characters (except spaces if needed)
+  return input.replace(/[^a-zA-Z0-9 ]/g, "");
+};
 const sanitizeInput = (input: string) => {
   const element = document.createElement("div");
   element.innerText = input;
@@ -202,7 +206,7 @@ const handleSignup = async () => {
   try {
     const sanitizedEmail = sanitizeInput(email.value);
     const sanitizedPassword = sanitizeInput(password.value);
-    const sanitizedFullName = sanitizeInput(fullName.value);
+    const sanitizedFullName = sanitizeName(fullName.value);  // Add sanitization for fullName
 
     // You can also validate the email format here
     if (!/\S+@\S+\.\S+/.test(sanitizedEmail)) {
@@ -212,7 +216,7 @@ const handleSignup = async () => {
     const response = await authStore.signup(
       sanitizedEmail,
       sanitizedPassword,
-      sanitizedFullName
+      sanitizedFullName // Pass sanitized full name
     );
     console.log("response", response);
 
@@ -227,6 +231,7 @@ const handleSignup = async () => {
     // console.error(errorMessage)
   }
 };
+
 
 const handleGoogleSignup = async () => {
   loading.value = true;

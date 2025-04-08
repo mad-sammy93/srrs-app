@@ -205,7 +205,7 @@ const users = storeToRefs(userStore).usersList;
 watch(
   () => userStore.usersList,
   (newVal) => {
-    console.log("Users updated:", newVal);
+    // console.log("Users updated:", newVal);
     users.value = newVal;
   },
   { immediate: true } // This ensures the watcher triggers immediately
@@ -255,7 +255,7 @@ onMounted(() => {
 const handleSelected = (newSelected: UserDetail[]) => {
   // Ensure only IDs are stored in form.memberIds
   form.value.memberIds = newSelected.map((member: any) => member.id);
-  console.log("Selected member IDs:", form.value.memberIds);
+  // console.log("Selected member IDs:", form.value.memberIds);
 };
 
 const checkweekday = (id: number | undefined) => {
@@ -268,6 +268,10 @@ const formattedOptions = users.value?.map((user: any) => ({
   id: user.id,
   value: user.email,
 }));
+
+const sanitizeInput = (input: string) => {
+  return input.replace(/<\/?[^>]+(>|$)/g, "").replace(/[^\w\s.,!?'"@()-]/g, "");
+};
 
 const showRecurrenceModal = ref(false);
 // Handle recurrence data
@@ -324,14 +328,18 @@ const checkRecPattern = (id: number | undefined) => {
   return "";
 };
 const validateForm = () => {
-  form.value.recurrencePatternId = form.value.recurrencePatternId
-    ? Number(form.value.recurrencePatternId)
-    : undefined;
+  form.value.agenda = sanitizeInput(form.value.agenda).trim();
 
   if (!form.value.agenda || form.value.agenda.length > 40) {
-    logMessage("Agenda must be between 1 to 40 characters.", "error");
+    logMessage("Agenda must be 1–40 characters and not contain unsafe characters.", "error");
     return false;
   }
+
+  if (/[^a-zA-Z0-9\s.,\-!()]/.test(form.value.agenda)) {
+    logMessage("Agenda contains invalid characters.", "error");
+    return false;
+  }
+
   if (
     !form.value.meetingDate ||
     !/^\d{4}-\d{2}-\d{2}$/.test(form.value.meetingDate)
@@ -339,40 +347,50 @@ const validateForm = () => {
     logMessage("Meeting Date must be in YYYY-MM-DD format.", "error");
     return false;
   }
+
   if (!form.value.startTime || !/^\d{2}:\d{2}$/.test(form.value.startTime)) {
-    logMessage("Start Time must be in HH:MM (24-hour) format.", "error");
+    logMessage("Start Time must be in HH:MM format.", "error");
     return false;
   }
+
   if (!form.value.endTime || !/^\d{2}:\d{2}$/.test(form.value.endTime)) {
-    logMessage("End Time must be in HH:MM (24-hour) format.", "error");
+    logMessage("End Time must be in HH:MM format.", "error");
     return false;
   }
+
+  const start = new Date(`1970-01-01T${form.value.startTime}:00`);
+  const end = new Date(`1970-01-01T${form.value.endTime}:00`);
+
+  if (end <= start) {
+    logMessage("End time must be after start time.", "error");
+    return false;
+  }
+
   if (!form.value.roomId || isNaN(Number(form.value.roomId))) {
     logMessage("Please select a valid room.", "error");
     return false;
   }
-
+  if (form.value.startTime < "08:00" || form.value.endTime > "20:00") {
+    logMessage("Meeting must be between 08:00 and 20:00.", "error");
+    return false;
+  }
   // Recurrence validation
   if (form.value.isRecurring) {
     if (!form.value.recurrencePatternId) {
       logMessage("Please select a recurrence pattern.", "error");
       return false;
     }
+
     if (form.value.recurrencePatternId === 2 && !form.value.weekdayId) {
       logMessage("Please select a weekday for weekly recurrence.", "error");
       return false;
     }
-    // if (form.value.recurrencePatternId === 1 ) {
-    //   if (!form.value.frequency || form.value.frequency <= 0) {
-    //   logMessage("Frequency must be a positive number.","error");
-    //   return false;
-    // }
-    // }
 
     if (!form.value.meetingEndDate) {
       logMessage("Please select a meeting end date for recurrence.", "error");
       return false;
     }
+
     if (form.value.meetingEndDate <= form.value.meetingDate) {
       logMessage("Meeting end date must be after the start date.", "error");
       return false;
@@ -391,6 +409,7 @@ const submitBooking = async () => {
   try {
     let bookingData = {
       ...form.value,
+      agenda: sanitizeInput(form.value.agenda),
       roomId: Number(form.value.roomId),
       userId: Number(form.value.userId),
       recurrencePatternId: Number(form.value.recurrencePatternId),

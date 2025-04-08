@@ -1,7 +1,7 @@
 <template>
   <div>
     <svg
-      class="w-7 h-7 text-gray-100 transition duration-75 dark:text-white group-hover:text-gray-900 dark:group-hover:text-white"
+      class="w-6 h-6 text-gray-100 transition duration-75 dark:text-white group-hover:text-gray-900 dark:group-hover:text-white"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="currentColor"

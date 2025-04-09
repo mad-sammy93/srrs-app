@@ -395,12 +395,6 @@ const showDeleteModal = ref(false);
 const selectedMeeting = ref<Meeting | null>(null);
 const deleteOption = ref<"SELECTED" | "SELECTED_AND_UPCOMING">("SELECTED");
 const disabledDelete = ref(false);
-// CLEAN
-// const logger = ref({
-//   message: "" as string | undefined,
-//   type: "error",
-//   duration: 3000,
-// });
 
 const confirmDelete = (meeting: Meeting) => {
   if (!meetingStatus) return noDeleteMeeting();
@@ -481,28 +475,8 @@ const emit = defineEmits([
 ]);
 
 // Pagination settings
-// const itemsPerPage = computed(() => props.itemsPerPage);
 const currentPage = computed(() => props.currentPage);
 const totalPages = computed(() => props.totalPages);
-
-// CLEAN
-// watch(
-//   () => props.totalPages,
-//   (newTotalPages, oldTotalPages) => {
-//     //   logMessage(
-//     //     `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
-//     //   ,'info');
-//   }
-// );
-
-// watch(
-//   () => props.currentPage,
-//   (newCurrentPage, oldCurrentPage) => {
-//     // logMessage(
-//     //   `Current page changed from ${oldCurrentPage} to ${newCurrentPage}`
-//     //   ,'info');
-//   }
-// );
 
 // Computed: Meetings for the current page
 const paginatedMeetings = computed(() => props.meetings);
@@ -517,13 +491,6 @@ const updateFilter = (event: Event, filterKey: keyof typeof filters.value) => {
     filters.value[filterKey] = target.value; // Safely update the filter value
   }
 };
-
-// // CLEAN
-// const filterMeetings = (searchTerm: string) => {
-//   // console.log("Search term:", filters.value.searchTerm);
-  
-//   emit("filterMeetings", searchTerm);
-// };
 
 // Pagination controls
 const prevPage = () => {

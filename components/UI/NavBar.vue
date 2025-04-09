@@ -156,13 +156,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/authStore";
 const authStore = useAuthStore();
-
-let openDropdown = ref(false);
-let open = ref(false);
-
-const refresh = () => {
-  authStore.refreshAuthToken();
-};
 </script>
 
 <style scoped></style>

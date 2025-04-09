@@ -1,16 +1,18 @@
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@/stores/authStore'
 import { ref } from 'vue'
-import type { User, FetchUserResponse } from '@/types'
+import type { UserDetail, FetchUserResponse } from '@/types'
 
 export const useUserStore = defineStore('users', () => {
   const authStore = useAuthStore()
   const token = authStore.token
-  const usersList = ref<User[]>([])
+  const usersList = ref<UserDetail[]>([])
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
 
   const fetchUsers = async (params: { pageNo: number; limit: number; userStatusId?: number }) => {
+
+    await authStore.refreshAuthToken();
     loading.value = true
     try {
       const searchParams = new URLSearchParams();

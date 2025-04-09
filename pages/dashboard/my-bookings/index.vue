@@ -1,6 +1,5 @@
 <template>
   <div>
-    {{ filters }}
     <div class="flex justify-between items-center py-8">
       <h3 class="text-xl text-blue-400 mb-4">My Bookings</h3>
       <button

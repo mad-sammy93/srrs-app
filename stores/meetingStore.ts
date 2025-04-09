@@ -13,6 +13,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
 
   // Fetch meeting data with dynamic parameters
   const fetchBookedMeeting = async (params: FetchMeetingParams) => {
+    await authStore.refreshAuthToken();
     loading.value = true;
     error.value = null;
 
@@ -46,6 +47,7 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   };
 
   const fetchBookedMeetingWithId = async (meetingId: number) => {
+    await authStore.refreshAuthToken();
     try {
       loading.value = true;
       const { data: meeting } = await $fetch<FetchBookingWIthIdResponse>(`/api/booked-meeting-rooms/${meetingId}`, {
@@ -71,7 +73,9 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       logMessage(err.message || 'Failed to fetch meeting', 'error')
     }
   }
+
   const bookMeetingRoom = async (formData: AddBookingFormData) => {
+    await authStore.refreshAuthToken();
     try {
       const cleanData = Object.fromEntries(
         Object.entries(formData).filter(([_, value]) =>
@@ -108,6 +112,8 @@ export const useMeetingStore = defineStore('meetingStore', () => {
 
 
   const editBookedMeetingRoom = async (meetingId: number, formData: EditBookedMeetingRoomFormData) => {
+
+    await authStore.refreshAuthToken();
     try {
       const response = await $fetch<EditBookedMeetingRoomResponse>(`/api/booked-meeting-rooms/${meetingId}`, {
         method: 'PATCH',
@@ -134,6 +140,8 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   };
 
   const deleteBookedMeetingRoom = async (meetingId: number, option: string) => {
+
+    await authStore.refreshAuthToken();
     try {
       const response = await $fetch(`/api/booked-meeting-rooms/${meetingId}?option=${option}`, {
         method: 'DELETE',

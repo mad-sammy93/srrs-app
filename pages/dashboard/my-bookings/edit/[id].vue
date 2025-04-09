@@ -573,10 +573,6 @@ const validateForm = () => {
       logMessage("Please select a weekday for weekly recurrence.", "error");
       return false;
     }
-    // if (!form.value.frequency || form.value.frequency <= 0) {
-    //   logMessage("Frequency must be a positive number.", "error");
-    //   return false;
-    // }
     if (!form.value.meetingEndDate) {
       logMessage("Please select a meeting end date for recurrence.", "error");
       return false;

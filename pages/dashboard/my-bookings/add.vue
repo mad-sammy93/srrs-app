@@ -169,14 +169,14 @@
             ></span
             >{{ room.roomName }} Room
           </div>
-          <div class="flex flex-wrap items-center dark:text-white">
+          <!-- <div class="flex flex-wrap items-center dark:text-white">
             <span class="w-6 h-6 mr-2 bg-gray-400 rounded inline-block"></span
             >Not Available
           </div>
           <div class="flex flex-wrap items-center dark:text-white">
             <span class="w-6 h-6 mr-2 bg-purple-200 rounded inline-block"></span
             >Selected Room
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

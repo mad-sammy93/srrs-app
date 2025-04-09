@@ -7,6 +7,7 @@ export const useRoomStore = defineStore('room', () => {
   const roomList = ref<Room[]>([])
   const fetchRoomsData = async () => {
     try {
+      await authStore.refreshAuthToken();
       const response = await $fetch<FetchRoomResponse>('/api/rooms', {
         method: 'GET',
         headers: {

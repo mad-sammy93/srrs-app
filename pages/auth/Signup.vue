@@ -189,13 +189,18 @@ const cancelOtp = () => {
 };
 
 const sanitizeName = (input: string) => {
-  // Remove non-alphanumeric characters (except spaces if needed)
-  return input.replace(/[^a-zA-Z0-9 ]/g, "");
+  const hasSpecialChars = /[^a-zA-Z0-9 ]/.test(input);
+
+  if (hasSpecialChars) {
+    logMessage("Please enter a valid name", "error");
+  }
+  return null;
 };
+
 const sanitizeInput = (input: string) => {
   const element = document.createElement("div");
   element.innerText = input;
-  return element.innerHTML; // This will escape any HTML characters
+  return element.textContent || ''; // Return the sanitized input
 };
 
 // Step 1: Handle Signup
@@ -206,19 +211,22 @@ const handleSignup = async () => {
   try {
     const sanitizedEmail = sanitizeInput(email.value);
     const sanitizedPassword = sanitizeInput(password.value);
-    const sanitizedFullName = sanitizeName(fullName.value);  // Add sanitization for fullName
+    const sanitizedFullName = sanitizeName(fullName.value); // Add sanitization for fullName
 
     // You can also validate the email format here
-    if (!/\S+@\S+\.\S+/.test(sanitizedEmail)) {
-      logMessage("Invalid email address.", "error");
-      return;
+    // if (!/\S+@\S+\.\S+/.test(sanitizedEmail)) {
+    //   logMessage("Invalid email address.", "error");
+    //   return;
+    // }
+    if (sanitizedEmail && sanitizedPassword && sanitizedFullName) {
+      const response = await authStore.signup(
+        sanitizedEmail,
+        sanitizedPassword,
+        sanitizedFullName // Pass sanitized full name
+      );
+      loading.value = false;
     }
-    const response = await authStore.signup(
-      sanitizedEmail,
-      sanitizedPassword,
-      sanitizedFullName // Pass sanitized full name
-    );
-    console.log("response", response);
+    // console.log("response", response);
 
     // if (data.value?.status === 200) {
     //   authStore.step = 2
@@ -231,7 +239,6 @@ const handleSignup = async () => {
     // console.error(errorMessage)
   }
 };
-
 
 const handleGoogleSignup = async () => {
   loading.value = true;
@@ -254,6 +261,11 @@ const handleGoogleSignup = async () => {
 // Step 2: Verify OTP
 const handleOTP = async () => {
   const sanitizedOtp = sanitizeInput(String(otp.value));
+
+  if (sanitizedOtp == undefined) {
+    logMessage("Invalid OTP. Please enter a valid OTP.", "error");
+    return;
+  }
 
   if (sanitizedOtp.length !== 6 || isNaN(Number(sanitizedOtp))) {
     logMessage("Invalid OTP. Please enter a valid 6-digit OTP.", "error");

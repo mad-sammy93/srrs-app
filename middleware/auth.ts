@@ -13,12 +13,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
   }
   // Check if access token exists
   if (authStore.token) {
-    // logMessage('Access token exists');
-    authStore.refreshAuthToken();
-
-    return;
+    // Optional: validate token or decode/check expiry
+    const isValid = authStore.validateToken?.(); // Optional helper in your store
+    logMessage(isValid?.valueOf() ? 'Access token is valid' : 'Access token is invalid', 'success');
+    if (!isValid) {
+      logMessage('Access token is invalid, trying to refresh...', 'warning');
+    } else {
+      return;
+    }
   }
-
   // If no access token but refresh token exists, try refreshing
   if (refreshToken.value) {
     logMessage('Refreshing access token...', 'success');
@@ -34,6 +37,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     } catch (error) {
       logMessage('Error refreshing token:' + error, 'error');
     }
+  } else {
+    return navigateTo('/auth/login');
   }
 
 

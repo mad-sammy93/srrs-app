@@ -17,5 +17,5 @@ export function logMessage(message: string, type: "success" | "error" | "info" |
   // Automatically clear message after some time (optional)
   setTimeout(() => {
     logger.value.message = "";
-  }, 3000);
+  }, 2000);
 }

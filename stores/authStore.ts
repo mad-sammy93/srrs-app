@@ -17,17 +17,15 @@ export const useAuthStore = defineStore('auth', () => {
   const tempToken = ref<string | null>(null);
   const loading = ref<boolean>(false)
   const error = ref<string | null>(null)
-  // const logger = ref<Logger>({
-  //   type: '',
-  //   message: '' as string | undefined,
-  //   duration: 3000
-  // })
   const user = ref<UserDetail | null>(null)
   const qrCode = ref<string | null>(null)
   const step = ref<number>(1) // 🔥 Explicitly defining step
   const router = useRouter()
 
   const isAuthenticated = computed(() => !!token.value)
+
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let refreshingPromise: Promise<boolean> | null = null;
 
   const setUserDetailsFromToken = (jwtToken: string) => {
     try {
@@ -39,8 +37,6 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const setTokens = (newAccessToken: string) => {
-    // logMessage('[SET TOKEN]', 'success');
-
     token.value = newAccessToken
     localStorage.setItem('token', newAccessToken)
     setUserDetailsFromToken(newAccessToken);
@@ -53,12 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const googleSSOLogin = async () => {
     try {
-      // const response = await $fetch('/api/auth/google-sso');
       window.open('/api/auth/google-sso', '_self', 'noopener,noreferrer');//open in the same tab
-      // if (response && response.data.url) {
-      //   // Open Google SSO page in a new tab
-      //   window.open(response.data.url, '_blank', 'noopener,noreferrer');
-      // }
     } catch (err: any) {
       logMessage(err.message || 'Login failed.', 'error');
       throw new Error(err.message || 'Login failed.');
@@ -133,27 +124,39 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const refreshAuthToken = async (): Promise<boolean> => {
+    if (refreshingPromise) return refreshingPromise;
 
-  const refreshAuthToken = async () => {
-    try {
-      const response = await $fetch<RefreshResponse>('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (response?.data.accessToken) {
-        // token.value = response.data.accessToken;
-        setTokens(response.data.accessToken)
-
-        return true;
+    refreshingPromise = new Promise((resolve) => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
       }
-      return false;
-    } catch (error) {
-      // console.error('Failed to refresh token:', error);
-      logMessage('Failed to refresh token.', 'error');
-      return false;
-    }
 
-  }
+      debounceTimer = setTimeout(async () => {
+        try {
+          const response = await $fetch<RefreshResponse>('/api/auth/refresh', {
+            method: 'POST',
+            credentials: 'include',
+          });
+
+          if (response?.data.accessToken) {
+            setTokens(response.data.accessToken);
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        } catch (error) {
+          logMessage('Failed to refresh token.', 'error');
+          navigateTo('/auth/login');
+          resolve(false);
+        } finally {
+          debounceTimer = null;
+          refreshingPromise = null;
+        }
+      }, 1000); // debounce time in ms
+    });
+    return refreshingPromise;
+  };
 
   const verifyOtp = async (otp: string) => {
     try {
@@ -239,6 +242,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const validateToken = () => {
+    if (token.value !== null) {
+      const payload = JSON.parse(atob(token.value.split('.')[1]));
+      return payload.exp * 1000 > Date.now();
+    } else {
+      return false;
+    }
+  }
+
   // Reset store
   const resetAuth = () => {
     user.value = null
@@ -257,6 +269,7 @@ export const useAuthStore = defineStore('auth', () => {
     step,
     tempToken,
     refreshToken,
+    validateToken,
     setUserDetailsFromToken,
     refreshAuthToken,
     setTokens,

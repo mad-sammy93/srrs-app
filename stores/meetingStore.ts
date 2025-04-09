@@ -5,6 +5,7 @@ import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeeti
 
 export const useMeetingStore = defineStore('meetingStore', () => {
   const authStore = useAuthStore();
+  const allBookings = ref<Meeting[]>([]);
   const bookings = ref<Meeting[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);

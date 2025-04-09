@@ -1,5 +1,6 @@
 <template>
   <div class="p-8">
+    {{ form }}
     <div class="mb-4 text-gray-500">
       <NuxtLink
         to="/dashboard"
@@ -79,6 +80,7 @@
             form.recurrencePatternId = 0;
             form.frequency = 0;
             form.weekdayId = 0;
+            form.meetingEndDate = '';
             form.isRecurring = false;
           "
           @save="handleRecurrence"
@@ -109,7 +111,7 @@
               required
             />
           </div>
-          <div
+          <!-- <div
             v-if="form.isRecurring"
             class="mb-4"
           >
@@ -121,7 +123,7 @@
               type="date"
               class="input-field dark:bg-slate-600 dark:text-white"
             />
-          </div>
+          </div> -->
           <div>
             <label class="block font-normal text-gray-500 dark:text-white"
               >Start Time</label
@@ -276,9 +278,12 @@ const sanitizeInput = (input: string) => {
 const showRecurrenceModal = ref(false);
 // Handle recurrence data
 const handleRecurrence = (options: any) => {
+  // console.log("Recurrence data:", options);
+  form.value.meetingEndDate = options.meetingEndDate;
   form.value.recurrencePatternId = options.frequency;
   form.value.frequency = options.until;
   form.value.weekdayId = options.weekdayId;
+  // form.value.occurences=options.occurences;
   showRecurrenceModal.value = false;
 };
 

@@ -1,10 +1,6 @@
 <template>
   <div>
-    <UIModalLogger
-      :message="logger.message"
-      :type="logger.type"
-    />
-    <div class="overflow-x-auto min-w-[1440px]">
+    <div class="overflow-x-auto min-w-[1440px] min-h-[350px]">
       <div class="flex justify-between items-center mb-4">
         <!-- paginatedMeetings: {{ paginatedMeetings }} -->
         <h3
@@ -22,12 +18,12 @@
               placeholder="Search by Meeting agenda or Room Name"
               class="p-2 border border-gray-300 rounded-md"
             />
-            <!-- <button
+            <button
             class="p-2 ml-2 bg-blue-500 text-white rounded-md"
-            @click="searchMeetings(filter.searchTerm)"
+            @click="applyFilters"
           >
             Search
-          </button> -->
+          </button>
           </div>
           <!-- Filter Button + Accordion -->
           <div class="relative">
@@ -72,30 +68,38 @@
                     </select>
                   </div>
                 </div>
-
-                <!-- fromDate -->
                 <div class="mb-2">
                   <button
-                    @click="toggleAccordion('fromDate')"
+                    @click="toggleAccordion('date')"
                     class="w-full flex justify-between items-center font-semibold"
                   >
                     Date
-                    <span>{{ openAccordion.fromDate ? "−" : "+" }}</span>
+                    <span>{{ openAccordion.date ? "−" : "+" }}</span>
                   </button>
                   <div
-                    v-show="openAccordion.fromDate"
+                    v-show="openAccordion.date"
                     class="mt-2 pl-2"
                   >
-                    <input
-                      type="date"
-                      v-model="filters.fromDate"
-                      class="border rounded p-1 w-full"
-                    />
+                    <label>From date
+                      <input
+                        type="date"
+                        v-model="filters.fromDate"
+                        class="border rounded p-1 w-full"
+                      />
+                      </label
+                    >
+                    <label>To date
+                      <input
+                        type="date"
+                        v-model="filters.toDate"
+                        class="border rounded p-1 w-full"
+                      /></label
+                    >
                   </div>
                 </div>
 
                 <!-- toDate -->
-                <div class="mb-2">
+                <!-- <div class="mb-2">
                   <button
                     @click="toggleAccordion('toDate')"
                     class="w-full flex justify-between items-center font-semibold"
@@ -113,7 +117,7 @@
                       class="border rounded p-1 w-full"
                     />
                   </div>
-                </div>
+                </div> -->
 
                 <!-- Status -->
                 <div class="mb-2">
@@ -146,7 +150,7 @@
                     @click="clearFilters"
                     class="px-3 py-1 text-gray-600 rounded-md border"
                   >
-                    Cancel
+                    Clear
                   </button>
                   <button
                     @click="applyFilters"
@@ -214,34 +218,51 @@
             <td class="p-3 border text-center">{{ meeting.paxCount }}</td>
             <td class="p-3 border text-center">{{ meeting.agenda }}</td>
             <td class="p-3 border text-center">
-              <span class="flex justify-center items-center">
+              <span
+                class="flex justify-center items-center border-solid border-2 rounded-lg space-x-0"
+                :class="{
+                  'border-green-600': meetingStatus[index].value === 'UPCOMING',
+                  'border-blue-600':
+                    meetingStatus[index].value === 'IN_PROGRESS',
+                  'border-gray-600': meetingStatus[index].value === 'COMPLETED',
+                }"
+              >
                 <span
                   class="flex w-2 h-2 mr-4 rounded-full"
                   :class="{
-                    'bg-green-600': meetingStatus[index] === 'Upcoming',
-                    'bg-blue-600': meetingStatus[index] === 'In Progress',
-                    'bg-gray-600': meetingStatus[index] === 'Completed',
+                    'bg-green-600': meetingStatus[index].value === 'UPCOMING',
+                    'bg-blue-600': meetingStatus[index].value === 'IN_PROGRESS',
+                    'bg-gray-600': meetingStatus[index].value === 'COMPLETED',
                   }"
                   aria-hidden="true"
                   tooltip="Online"
                 ></span>
-                {{ meetingStatus[index] }}
+                {{ meetingStatus[index].label }}
               </span>
             </td>
             <td class="p-3 border flex justify-around text-center">
               <button
                 class="text-blue-600 hover:underline mr-2"
                 @click="$emit('edit', meeting)"
+                :disabled="meetingStatus[index].value === 'UPCOMING'"
               >
-                <UIAtomsIconsEditBooking :color="`#60a5fa`" />
+                <UIAtomsIconsEditBooking
+                  :color="
+                    meetingStatus[index].value !== 'UPCOMING'
+                      ? 'gray'
+                      : '#60a5fa'
+                  "
+                />
               </button>
               <button
                 class="text-red-600 hover:underline"
                 @click="confirmDelete(meeting)"
-                :disabled="meetingStatus[index] !== 'Upcoming'"
+                :disabled="meetingStatus[index].value !== 'UPCOMING'"
               >
                 <UIAtomsIconsDeleteBooking
-                  :color="meetingStatus[index] !== 'Upcoming' ? 'gray' : 'red'"
+                  :color="
+                    meetingStatus[index].value !== 'UPCOMING' ? 'gray' : 'red'
+                  "
                 />
               </button>
             </td>
@@ -319,7 +340,10 @@
 
         <!-- Delete Options -->
         <div class="mb-4">
-          <label class="flex items-center mb-2">
+          <label
+            class="flex items-center mb-2"
+            v-show="selectedMeeting?.isRecurring"
+          >
             <input
               type="radio"
               v-model="deleteOption"
@@ -327,16 +351,21 @@
               class="mr-2"
               checked
             />
-            Delete only this meeting
+            Delete only this event
           </label>
-          <label class="flex items-center">
+
+          <!-- Show this option only if the meeting is recurring -->
+          <label
+            v-if="selectedMeeting?.isRecurring"
+            class="flex items-center"
+          >
             <input
               type="radio"
               v-model="deleteOption"
               value="SELECTED_AND_UPCOMING"
               class="mr-2"
             />
-            Delete this and all upcoming meetings
+            Delete this and all upcoming events
           </label>
         </div>
 
@@ -383,22 +412,31 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { Meeting } from "@/types";
+import rooms from "~/server/api/Authenticated/rooms";
 
 const showDeleteModal = ref(false);
 const selectedMeeting = ref<Meeting | null>(null);
 const deleteOption = ref<"SELECTED" | "SELECTED_AND_UPCOMING">("SELECTED");
 const disabledDelete = ref(false);
-const logger = ref({
-  message: "" as string | undefined,
-  type: "error",
-  duration: 3000,
-});
+// CLEAN
+// const logger = ref({
+//   message: "" as string | undefined,
+//   type: "error",
+//   duration: 3000,
+// });
 
 const confirmDelete = (meeting: Meeting) => {
-  if (!meetingStatus.value.includes("Upcoming")) return noDeleteMeeting();
+  if (!meetingStatus) return noDeleteMeeting();
+
   selectedMeeting.value = meeting;
   showDeleteModal.value = true;
-  deleteOption.value = "SELECTED";
+
+  // Show "Delete this and all upcoming meetings" only if the meeting is recurring
+  if (meeting.isRecurring) {
+    deleteOption.value = "SELECTED_AND_UPCOMING";
+  } else {
+    deleteOption.value = "SELECTED";
+  }
 };
 const deleteMeeting = () => {
   if (!selectedMeeting.value) return;
@@ -414,8 +452,7 @@ const deleteMeeting = () => {
 };
 const noDeleteMeeting = () => {
   disabledDelete.value = true;
-  logger.value.message = "Cannot delete meeting";
-  logger.value.type = "warning";
+  logMessage("Cannot delete meeting", "warning");
   setTimeout(() => {
     disabledDelete.value = false;
   }, 2000);
@@ -439,6 +476,10 @@ const props = defineProps({
     },
     required: true,
   },
+  rooms: {
+    type: Object as () => { id: number; roomName: string , pax: number, hexColor: string}[],
+    required: true,
+  },
   currentPage: {
     type: Number,
     required: true,
@@ -457,7 +498,7 @@ const emit = defineEmits([
   "fetchPageData",
   "edit",
   "cancel",
-  "searchMeetings",
+  "filterMeetings",
   "update:filter",
   "fetchPageData",
 ]);
@@ -467,23 +508,24 @@ const emit = defineEmits([
 const currentPage = computed(() => props.currentPage);
 const totalPages = computed(() => props.totalPages);
 
-watch(
-  () => props.totalPages,
-  (newTotalPages, oldTotalPages) => {
-    //   logMessage(
-    //     `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
-    //   ,'info');
-  }
-);
+// CLEAN
+// watch(
+//   () => props.totalPages,
+//   (newTotalPages, oldTotalPages) => {
+//     //   logMessage(
+//     //     `Total pages changed from ${oldTotalPages} to ${newTotalPages}`
+//     //   ,'info');
+//   }
+// );
 
-watch(
-  () => props.currentPage,
-  (newCurrentPage, oldCurrentPage) => {
-    // logMessage(
-    //   `Current page changed from ${oldCurrentPage} to ${newCurrentPage}`
-    //   ,'info');
-  }
-);
+// watch(
+//   () => props.currentPage,
+//   (newCurrentPage, oldCurrentPage) => {
+//     // logMessage(
+//     //   `Current page changed from ${oldCurrentPage} to ${newCurrentPage}`
+//     //   ,'info');
+//   }
+// );
 
 // Computed: Meetings for the current page
 const paginatedMeetings = computed(() => props.meetings);
@@ -491,14 +533,19 @@ interface Filters {
   [key: string]: string | number;
 }
 const updateFilter = (event: Event, filterKey: keyof typeof filters.value) => {
+
+  // console.log("Search term:", filters.value);
   const target = event.target as HTMLInputElement | null;
   if (target) {
     filters.value[filterKey] = target.value; // Safely update the filter value
   }
 };
 
-// const searchMeetings = (searchTerm: string) => {
-//   emit("searchMeetings", searchTerm);
+// // CLEAN
+// const filterMeetings = (searchTerm: string) => {
+//   // console.log("Search term:", filters.value.searchTerm);
+  
+//   emit("filterMeetings", searchTerm);
 // };
 
 // Pagination controls
@@ -509,7 +556,6 @@ const prevPage = () => {
 };
 
 const nextPage = () => {
-
   if (props.currentPage < props.totalPages) {
     emit("fetchPageData", props.currentPage + 1);
   }
@@ -522,17 +568,17 @@ const meetingStatus = computed(() => {
     const endDate = new Date(meeting.endDateTime);
     const now = new Date();
 
-    if (now < startDate) return "Upcoming";
-    if (now >= startDate && now < endDate) return "In Progress";
-    return "Completed";
+    if (now < startDate) return { label: "Upcoming", value: "UPCOMING" };
+    if (now >= startDate && now < endDate)
+      return { label: "In Progress", value: "IN_PROGRESS" };
+    return { label: "Completed", value: "COMPLETED" };
   });
 });
 
 const showFilter = ref(false);
 const openAccordion = ref({
   roomFilter: true,
-  fromDate: false,
-  toDate: false,
+  date: false,
   status: false,
 });
 
@@ -561,22 +607,23 @@ const clearFilters = () => {
 
 const applyFilters = () => {
   const activeFilters = {
+    searchTerm: filters.value.searchTerm,
     roomId: filters.value.roomId,
     status: filters.value.status,
     fromDate: filters.value.fromDate,
     toDate: filters.value.toDate,
   };
 
-  emit("searchMeetings", activeFilters); // Emit the filter values to parent
+  emit("filterMeetings", activeFilters); // Emit the filter values to parent
 };
 
 const uniqueRooms = computed(() => {
   return Array.from(
-    new Set(props.meetings.map((m) => m.room.id)) // Ensure no duplicate room IDs
+    new Set(props.rooms.map((m) => m.id)) // Ensure no duplicate room IDs
   ).map((roomId) => {
     return {
       roomId,
-      roomName: props.meetings.find((m) => m.room.id === roomId)?.room.roomName,
+      roomName: props.rooms.find((m) => m.id === roomId)?.roomName,
     };
   });
 });

@@ -17,19 +17,22 @@
       @edit="editBookedMeetingRoom"
       @cancel="cancelBookedMeetingRoom"
       :filter="filters"
+      :rooms="roomStore.roomList"
       title="My Bookings"
       @fetchPageData="fetchPageData"
-      @searchMeetings="searchMeetings"
+      @filterMeetings="filterMeetings"
       :loading="loading"
     />
   </div>
 </template>
 <script setup lang="ts">
 import { useMeetingStore } from "@/stores/meetingStore";
+import { useRoomStore } from "@/stores/roomStore";
 import type { Meeting } from "@/types";
 import { computed, ref, onMounted, watch } from "vue";
 
 const meetingStore = useMeetingStore();
+const roomStore = useRoomStore();
 
 const filters = ref({
   toDate: "",
@@ -60,10 +63,15 @@ const debounce = (callback: () => void, delay: number) => {
   timeoutId = setTimeout(callback, delay); // Set a new timeout
 };
 
-const searchMeetings = (filter: { roomId: number; status: string; toDate: string; fromDate: string; searchTerm: string}) => {
+const filterMeetings = (filter: { roomId: number; status: string; toDate: string; fromDate: string; searchTerm: string}) => {
+  
   filters.value = filter; // Set the filters in the parent
-  fetchPageData(1, filter); // Fetch page data with the filters
+
+  console.log("Filter:", filters.value);
+  // fetchPageData(1, filter); // Fetch page data with the filters
 };
+
+
 const fetchPageData = (pageNo: number, filter = filters.value) => {
   currentPage.value = pageNo;
   const params = {
@@ -81,6 +89,8 @@ const fetchPageData = (pageNo: number, filter = filters.value) => {
 
 onMounted(() => {
   fetchPageData(1);
+
+  roomStore.fetchRoomsData();
 });
 
 const editBookedMeetingRoom = (meeting: Meeting) => {

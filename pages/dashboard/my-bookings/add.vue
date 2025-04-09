@@ -1,6 +1,5 @@
 <template>
   <div class="p-8">
-    {{ form }}
     <div class="mb-4 text-gray-500">
       <NuxtLink
         to="/dashboard"
@@ -94,11 +93,7 @@
           {{ form.weekdayId ? `on ` + checkweekday(form.weekdayId) : "" }}
         </div> -->
         <div
-          class="grid gap-4"
-          :class="{
-            'grid-cols-2': form.isRecurring,
-            'grid-cols-3': !form.isRecurring,
-          }"
+          class="grid gap-4 grid-cols-3"
         >
           <div class="mb-4">
             <label class="block font-normal text-gray-500 dark:text-white"

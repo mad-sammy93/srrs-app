@@ -11,11 +11,11 @@
         <span
           v-for="option in selected"
           :key="option.value"
-          class="inline-flex items-center rounded-full bg-gray-200 px-2 py-3 text-lg"
+          class="inline-flex items-center rounded-full bg-gray-200 px-2 py-1 text-sm"
         >
           {{ option.label }}
           <button
-            @click="handleUnselect(option)"
+            @click.prevent="handleUnselect(option)"
             @keydown.enter.prevent="handleUnselect(option)"
             @mousedown.prevent
             class="ml-1 focus:outline-none"
@@ -44,7 +44,7 @@
           :key="option.value"
           class="cursor-pointer px-4 py-2 hover:bg-gray-100 w-full"
           @mousedown.prevent
-          @click="selectOption(option)"
+          @click.prevent="selectOption(option)"
         >
           {{ option.label }}
         </li>

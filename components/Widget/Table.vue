@@ -2,7 +2,6 @@
   <div>
     <div class="overflow-x-auto min-w-[1440px] min-h-[350px]">
       <div class="flex justify-between items-center mb-4">
-        <!-- paginatedMeetings: {{ paginatedMeetings }} -->
         <h3
           v-if="title"
           class="text-2xl font-semibold mb-4 dark:text-white"
@@ -20,7 +19,7 @@
             />
             <button
             class="p-2 ml-2 bg-blue-500 text-white rounded-md"
-            @click="applyFilters"
+            @click.prevent="applyFilters"
           >
             Search
           </button>
@@ -28,7 +27,7 @@
           <!-- Filter Button + Accordion -->
           <div class="relative">
             <button
-              @click="showFilter = !showFilter"
+              @click.prevent="showFilter = !showFilter"
               class="px-4 py-2 border rounded-md bg-white dark:bg-slate-900 dark:text-white"
             >
               Filter
@@ -43,7 +42,7 @@
                 <!-- Room Name -->
                 <div class="mb-2">
                   <button
-                    @click="toggleAccordion('roomFilter')"
+                    @click.prevent="toggleAccordion('roomFilter')"
                     class="w-full flex justify-between items-center font-semibold"
                   >
                     Room Name
@@ -70,7 +69,7 @@
                 </div>
                 <div class="mb-2">
                   <button
-                    @click="toggleAccordion('date')"
+                    @click.prevent="toggleAccordion('date')"
                     class="w-full flex justify-between items-center font-semibold"
                   >
                     Date
@@ -97,32 +96,10 @@
                     >
                   </div>
                 </div>
-
-                <!-- toDate -->
-                <!-- <div class="mb-2">
-                  <button
-                    @click="toggleAccordion('toDate')"
-                    class="w-full flex justify-between items-center font-semibold"
-                  >
-                    Date
-                    <span>{{ openAccordion.toDate ? "−" : "+" }}</span>
-                  </button>
-                  <div
-                    v-show="openAccordion.toDate"
-                    class="mt-2 pl-2"
-                  >
-                    <input
-                      type="date"
-                      v-model="filters.toDate"
-                      class="border rounded p-1 w-full"
-                    />
-                  </div>
-                </div> -->
-
                 <!-- Status -->
                 <div class="mb-2">
                   <button
-                    @click="toggleAccordion('status')"
+                    @click.prevent="toggleAccordion('status')"
                     class="w-full flex justify-between items-center font-semibold"
                   >
                     Status
@@ -147,13 +124,13 @@
                 <!-- Filter Buttons -->
                 <div class="flex justify-between mt-4">
                   <button
-                    @click="clearFilters"
+                    @click.prevent="clearFilters"
                     class="px-3 py-1 text-gray-600 rounded-md border"
                   >
                     Clear
                   </button>
                   <button
-                    @click="applyFilters"
+                    @click.prevent="applyFilters"
                     class="px-3 py-1 bg-blue-500 text-white rounded-md"
                   >
                     Apply
@@ -243,8 +220,8 @@
             <td class="p-3 border flex justify-around text-center">
               <button
                 class="text-blue-600 hover:underline mr-2"
-                @click="$emit('edit', meeting)"
-                :disabled="meetingStatus[index].value === 'UPCOMING'"
+                @click.prevent="$emit('edit', meeting)"
+                :disabled="meetingStatus[index].value !== 'UPCOMING'"
               >
                 <UIAtomsIconsEditBooking
                   :color="
@@ -256,7 +233,7 @@
               </button>
               <button
                 class="text-red-600 hover:underline"
-                @click="confirmDelete(meeting)"
+                @click.prevent="confirmDelete(meeting)"
                 :disabled="meetingStatus[index].value !== 'UPCOMING'"
               >
                 <UIAtomsIconsDeleteBooking
@@ -372,13 +349,13 @@
         <div class="flex justify-end mt-4">
           <button
             class="px-4 py-2 mr-2 bg-gray-300 rounded-md"
-            @click="showDeleteModal = false"
+            .prevent="showDeleteModal = false"
           >
             Cancel
           </button>
           <button
             class="px-4 py-2 bg-red-600 text-white rounded-md"
-            @click="deleteMeeting"
+            @click.prevent="deleteMeeting"
           >
             Delete
           </button>
@@ -389,7 +366,7 @@
     <!-- Pagination Controls -->
     <div class="flex justify-between items-center mt-4 dark:text-white">
       <button
-        @click="prevPage"
+        @click.prevent="prevPage"
         :disabled="currentPage === 1"
         class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 dark:bg-blue-500"
       >
@@ -399,7 +376,7 @@
       <span> Page {{ currentPage }} of {{ totalPages }} </span>
 
       <button
-        @click="nextPage"
+        @click.prevent="nextPage"
         :disabled="currentPage >= totalPages"
         class="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 dark:bg-blue-500"
       >

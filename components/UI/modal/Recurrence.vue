@@ -78,8 +78,8 @@
 
       <!-- Footer Buttons -->
       <div class="flex justify-end space-x-2 mt-6">
-        <button @click="$emit('close')" class="btn-secondary">Cancel</button>
-        <button @click="validateAndSave" class="btn-primary">Okay</button>
+        <button @click.prevent="$emit('close')" class="btn-secondary">Cancel</button>
+        <button @click.prevent="validateAndSave" class="btn-primary">Okay</button>
       </div>
     </div>
   </div>

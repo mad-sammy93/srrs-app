@@ -276,7 +276,7 @@
           <button
             type="button"
             class="mr-4 border border-1 border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white px-4 py-2 rounded-md"
-            @click="cancelEdit"
+            @click.prevent="cancelEdit"
           >
             Cancel
           </button>
@@ -350,14 +350,14 @@
             v-if="form.isRecurring"
           >
             <button
-              @click="confirmEdit('SELECTED')"
+              @click.prevent="confirmEdit('SELECTED')"
               class="btn-secondary dark:text-white"
             >
               Only this meeting
             </button>
 
             <button
-              @click="confirmEdit('SELECTED_AND_UPCOMING')"
+              @click.prevent="confirmEdit('SELECTED_AND_UPCOMING')"
               class="btn-primary dark:text-white"
             >
               This and upcoming meetings
@@ -366,13 +366,13 @@
 
           <button
             v-if="!form.isRecurring"
-            @click="confirmEdit('SELECTED')"
+            @click.prevent="confirmEdit('SELECTED')"
             class="mt-4 btn-primary"
           >
             Confirm
           </button>
           <button
-            @click="confirmModalVisible = false"
+            @click.prevent="confirmModalVisible = false"
             class="btn-secondary mt-4 text-gray-500 dark:text-white hover:text-gray-700"
           >
             Cancel
@@ -390,8 +390,7 @@ import { useMeetingStore } from "@/stores/meetingStore";
 import { useRoute } from "vue-router";
 import type {
   FormData,
-  UserDetail,
-  EditBookedMeetingRoomFormData,
+  UserDetail
 } from "@/types";
 
 const roomStore = useRoomStore();

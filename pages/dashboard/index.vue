@@ -9,7 +9,7 @@
       >
       <button
         class="absolute right-0 top-[50%] translate-y-[-50%] bg-gray-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        @click="addBooking"
+        @click.prevent="addBooking"
       >
         Book Room
       </button>

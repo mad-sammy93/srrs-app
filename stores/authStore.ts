@@ -49,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const googleSSOLogin = async () => {
     try {
-      window.open('/api/auth/google-sso', '_self', 'noopener,noreferrer');//open in the same tab
+      window.open('/api/auth/google-sso', '_self', 'noopener,noreferrer');
     } catch (err: any) {
       logMessage(err.message || 'Login failed.', 'error');
       throw new Error(err.message || 'Login failed.');
@@ -95,19 +95,15 @@ export const useAuthStore = defineStore('auth', () => {
         logMessage(response.error.value?.data?.message || 'Login failed', 'error');
       }
     } catch (err: any) {
-      // logMessage(err.message || 'Login failed.', 'error');
-      // throw new Error(err.message || 'Login failed.')
       if (err?.response?._data?.message) {
         logMessage(err.response._data.message, 'error')
-        // errorMessage = err.response._data.message; // Extract API error message
       } else if (err?.message) {
         logMessage(err.message, 'error')
-        // errorMessage = err.message;
       }
     }
   }
 
-  const logout = async () => { //TODO : Fix logout
+  const logout = async () => {
     try {
       await $fetch('/api/auth/logout', {
         method: 'POST',
@@ -153,7 +149,7 @@ export const useAuthStore = defineStore('auth', () => {
           debounceTimer = null;
           refreshingPromise = null;
         }
-      }, 1000); // debounce time in ms
+      }, 1000);
     });
     return refreshingPromise;
   };
@@ -169,16 +165,12 @@ export const useAuthStore = defineStore('auth', () => {
       })
       logMessage('OTP verification successful', 'success');
       setTokens(response.data.accessToken)
-      tempToken.value = null // Clear temp token
+      tempToken.value = null
     } catch (err: any) {
-      // logMessage(err.message || 'OTP verification failed.', 'error');
-      // throw new Error(err.message || 'OTP verification failed.')
       if (err?.response?._data?.message) {
         logMessage(err.response._data.message, 'error')
-        // errorMessage = err.response._data.message; // Extract API error message
       } else if (err?.message) {
         logMessage(err.message, 'error')
-        // errorMessage = err.message;
       }
     }
   }

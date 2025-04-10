@@ -1,8 +1,7 @@
 <template>
   <div class="relative">
-    <label class="block font-normal text-gray-500 dark:text-white"
-      >Members / Guest</label
-    >
+    <label class="block font-normal text-gray-500 dark:text-white">Members / Guest</label>
+    {{ props.selectedValues }}
     <div
       class="group rounded-sm border-gray-300 border border-input px-3 py-2 text-md ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0"
       @keydown="handleKeyDown"
@@ -54,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 
 const props = defineProps({
   options: {
@@ -65,10 +64,14 @@ const props = defineProps({
       Array.isArray(opts) &&
       opts.every(
         (o) =>
-          typeof o.label === "string" &&
-          typeof o.value === "number" &&
-          typeof o.value === "string"
+          (typeof o.label === "string" && typeof o.value === "string") ||
+          typeof o.value === "number"
       ),
+  },
+  selectedValues: {
+    type: Array,
+    required: false,
+    default: () => [],  // default empty array if no value is passed from parent
   },
 });
 
@@ -90,6 +93,7 @@ const filteredOptions = computed(() =>
 
 const handleUnselect = (option) => {
   selected.value = selected.value.filter((f) => f.value !== option.value);
+  emit("update:selected", selected.value); // Emit the updated selected array to parent
 };
 
 const handleKeyDown = (e) => {
@@ -111,7 +115,7 @@ const handleKeyDown = (e) => {
 
 const selectOption = (option) => {
   selected.value.push(option); // Add the selected option
-  emit("update:selected", selected.value); // Emit the updated selected array
+  emit("update:selected", selected.value); // Emit the updated selected array to parent
   inputValue.value = ""; // Clear the input field
 };
 // Watch selected and emit when it changes

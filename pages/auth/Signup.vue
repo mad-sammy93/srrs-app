@@ -1,8 +1,5 @@
 <template>
   <div class="bg-transparent">
-    <!-- {{ errorMessage }} -->
-    <!-- <UIModalLogger type="error" :message="errorMessage" /> -->
-
     <form
       class="min-w-[300px] mx-auto"
       @submit.prevent="authStore.step === 1 ? handleSignup() : handleOTP()"
@@ -129,11 +126,6 @@
         </div>
       </div>
 
-      <!-- Error Message -->
-      <!-- <p v-if="errorMessage" class="relative rounded border-rose-500 p-1 bg-white text-red-500 text-sm mb-3">
-        {{ errorMessage }}
-      </p> -->
-
       <!-- Google Sign-In Button -->
       <hr
         class="my-[40px] border-gray-700"
@@ -183,7 +175,6 @@ const fullName = ref("");
 const otp = ref("");
 
 const loading = ref(false);
-// const errorMessage = ref<string | undefined>(undefined)
 const cancelOtp = () => {
   authStore.step = 1;
 };
@@ -200,24 +191,20 @@ const sanitizeName = (input: string) => {
 const sanitizeInput = (input: string) => {
   const element = document.createElement("div");
   element.innerText = input;
-  return element.textContent || ''; // Return the sanitized input
+  return element.textContent || '';
 };
 
 // Step 1: Handle Signup
 const handleSignup = async () => {
   loading.value = true;
-  // errorMessage.value = undefined
+  console.log('handleSignup');
+  
 
   try {
     const sanitizedEmail = sanitizeInput(email.value);
     const sanitizedPassword = sanitizeInput(password.value);
     const sanitizedFullName = sanitizeName(fullName.value); // Add sanitization for fullName
 
-    // You can also validate the email format here
-    // if (!/\S+@\S+\.\S+/.test(sanitizedEmail)) {
-    //   logMessage("Invalid email address.", "error");
-    //   return;
-    // }
     if (sanitizedEmail && sanitizedPassword && sanitizedFullName) {
       const response = await authStore.signup(
         sanitizedEmail,
@@ -226,29 +213,25 @@ const handleSignup = async () => {
       );
       loading.value = false;
     }
-    // console.log("response", response);
-
-    // if (data.value?.status === 200) {
-    //   authStore.step = 2
-    // }else{
-    //   // logMessage(data.value?.message || 'Signup failed. Please try again.', 'error')
-    // }
+    
+    const success = await authStore.signup(email.value, password.value, fullName.value)
+    if (success) {
+      authStore.step = 2
+    }else{
+      logMessage( 'Signup failed. Please try again.', 'error')
+    }
   } catch (err: any) {
-    // errorMessage.value = err.message  || 'Signup failed. Please try again.'
     logMessage(err.message || "Signup failed. Please try again.", "error");
-    // console.error(errorMessage)
   }
 };
 
 const handleGoogleSignup = async () => {
   loading.value = true;
-  // errorMessage.value = undefined
 
   try {
     await authStore.googleSSOLogin();
-    // router.push('/dashboard') // Redirect after successful Google login
+      navigateTo('/') 
   } catch (err: any) {
-    // errorMessage.value = err.message || 'Google Signup failed. Please try again.'
     logMessage(
       err.message || "Google Signup failed. Please try again.",
       "error"
@@ -267,7 +250,7 @@ const handleOTP = async () => {
     return;
   }
 
-  if (sanitizedOtp.length !== 6 || isNaN(Number(sanitizedOtp))) {
+  if (sanitizedOtp.length !== 6 ) {
     logMessage("Invalid OTP. Please enter a valid 6-digit OTP.", "error");
     return;
   }

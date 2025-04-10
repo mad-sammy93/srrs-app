@@ -5,22 +5,21 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
   const authStore = useAuthStore();
   const refreshToken = useCookie('refreshToken');
-  //if you go to login or signup with token existing, redirect to home
-  if (to.path === '/auth/login' || to.path === '/auth/signup') {
-    if (authStore.token) {
-      return navigateTo('/');
-    }
-  }
   // Check if access token exists
   if (authStore.token) {
-    // Optional: validate token or decode/check expiry
     const isValid = authStore.validateToken?.(); // Optional helper in your store
-    logMessage(isValid?.valueOf() ? 'Access token is valid' : 'Access token is invalid', 'success');
     if (!isValid) {
       logMessage('Access token is invalid, trying to refresh...', 'warning');
     } else {
       return;
     }
+  }
+
+  //if you go to login or signup with token existing, redirect to home
+  if (authStore.token && (to.path === '/auth/login' || to.path === '/auth/signup')) {
+    console.log('Access token exists, redirecting to home...');
+
+    return navigateTo('/');
   }
   // If no access token but refresh token exists, try refreshing
   if (refreshToken.value) {

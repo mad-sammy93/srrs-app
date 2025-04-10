@@ -202,7 +202,7 @@ const users = storeToRefs(userStore).usersList;
 watch(
   () => userStore.usersList,
   (newVal) => {
-    // console.log("Users updated:", newVal);
+    console.log("Users updated:", newVal);
     users.value = newVal;
   },
   { immediate: true } // This ensures the watcher triggers immediately

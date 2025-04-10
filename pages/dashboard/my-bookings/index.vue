@@ -10,14 +10,16 @@
       </button>
     </div>
     <WidgetTable
-      :meetings="meetingStore.bookings"
+      :meetings="meetingStore.myBookings"
       :currentPage="currentPage"
       :totalPages="totalPages"
       @edit="editBookedMeetingRoom"
       @cancel="cancelBookedMeetingRoom"
+      :totalMeetingCount="totalMeetingCount"
       :filter="filters"
       :rooms="roomStore.roomList"
       title="My Bookings"
+      :statusItems="statusItems"
       @fetchPageData="fetchPageData"
       @filterMeetings="filterMeetings"
       :loading="loading"
@@ -43,6 +45,7 @@ const filters = ref({
 
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
+const totalMeetingCount = computed(() => meetingStore.totalMeetingCount)
 const totalPages = computed(() => meetingStore.totalPages);
 const loading = computed(() => meetingStore.loading);
 
@@ -63,13 +66,13 @@ const debounce = (callback: () => void, delay: number) => {
 };
 
 const filterMeetings = (filter: { roomId: number; status: string; toDate: string; fromDate: string; searchTerm: string}) => {
+  console.log("Filter:", filter);
   
   filters.value = filter; // Set the filters in the parent
 
   console.log("Filter:", filters.value);
-  // fetchPageData(1, filter); // Fetch page data with the filters
+  fetchPageData(1, filter); // Fetch page data with the filters
 };
-
 
 const fetchPageData = (pageNo: number, filter = filters.value) => {
   currentPage.value = pageNo;
@@ -85,11 +88,18 @@ const fetchPageData = (pageNo: number, filter = filters.value) => {
 };
   meetingStore.fetchBookedMeeting(params);
 };
-
+const statusItems = [
+  { label: "Upcoming", value: "UPCOMING" },
+  { label: "In Progress", value: "IN_PROGRESS" },
+  { label: "Completed", value: "COMPLETED" },
+]
 onMounted(() => {
   fetchPageData(1);
 
   roomStore.fetchRoomsData();
+});
+
+onUnmounted(() => {
 });
 
 const editBookedMeetingRoom = (meeting: Meeting) => {

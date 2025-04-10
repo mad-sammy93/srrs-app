@@ -5,7 +5,8 @@ import type { Meeting, FetchMeetingResponse, FetchMeetingParams, EditBookedMeeti
 
 export const useMeetingStore = defineStore('meetingStore', () => {
   const authStore = useAuthStore();
-  const allBookings = ref<Meeting[]>([]);
+  const totalMeetingCount = ref<number>(0)
+  const myBookings = ref<Meeting[]>([]);
   const bookings = ref<Meeting[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -34,7 +35,11 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       });
 
       if (response) {
-        bookings.value = response.data.list;
+        if (queryParams.myBookingsOnly) {
+          myBookings.value = response.data.list
+          totalMeetingCount.value = 0
+          bookings.value = response.data.list;
+        }
         totalPages.value = response.data.pagination.numberOfPages;
         totalItems.value = response.data.pagination.totalItemCount;
       } else {
@@ -158,9 +163,11 @@ export const useMeetingStore = defineStore('meetingStore', () => {
   }
 
   return {
+    myBookings,
     bookings,
     loading,
     totalPages,
+    totalMeetingCount,
     error,
     fetchBookedMeetingWithId,
     fetchBookedMeeting,

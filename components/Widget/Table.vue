@@ -114,9 +114,7 @@
                       class="border rounded w-full p-1"
                     >
                       <option value="">All Statuses</option>
-                      <option value="Upcoming">Upcoming</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
+                      <option v-for="status in statusItems" :key="status.value" :value="status.value" >{{ status.label }}</option>
                     </select>
                   </div>
                 </div>
@@ -141,7 +139,6 @@
           </div>
         </div>
       </div>
-
       <table
         class="min-w-full bg-white border dark:bg-slate-800 dark:text-white border-gray-300 text-gray-500"
         v-if="!loading"
@@ -163,6 +160,7 @@
           </tr>
         </thead>
         <tbody>
+          
           <tr
             v-for="(meeting, index) in paginatedMeetings"
             :key="index"
@@ -361,10 +359,14 @@
           </button>
         </div>
       </div>
+    </div> 
+
+    <div v-if="totalMeetingCount === 0" class="text-xl text-slate-700 text-center py-8">
+      There are no meetings
     </div>
 
     <!-- Pagination Controls -->
-    <div class="flex justify-between items-center mt-4 dark:text-white">
+    <div class="flex justify-between items-center mt-4 dark:text-white py-8" >
       <button
         @click.prevent="prevPage"
         :disabled="currentPage === 1"
@@ -389,7 +391,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import type { Meeting } from "@/types";
-import rooms from "~/server/api/Authenticated/rooms";
 
 const showDeleteModal = ref(false);
 const selectedMeeting = ref<Meeting | null>(null);
@@ -451,11 +452,19 @@ const props = defineProps({
     type: Object as () => { id: number; roomName: string , pax: number, hexColor: string}[],
     required: true,
   },
+  statusItems: {
+    type: Array as () => { label: string; value: string }[],
+    required: true,
+  },
   currentPage: {
     type: Number,
     required: true,
   },
   totalPages: {
+    type: Number,
+    required: true,
+  },
+  totalMeetingCount :{
     type: Number,
     required: true,
   },

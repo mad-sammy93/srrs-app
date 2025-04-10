@@ -15,138 +15,53 @@
           class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
           id="navbar-language"
         >
-          <span
+          
+          <button @click="showUserMenu = !showUserMenu" class="flex flex-row items-center gap-2 text-white text-lg ">
+            <span
+              class="text-md font text-gray-700 hover:border-gray  h-8 min-w-8 bg-white dark:bg-slate-600 dark:text-white  rounded-2xl p-2 justify-center m-auto flex items-center"
+              
+            >
+              {{ getInitials(authStore.myDetails?.fullName) }}
+            </span>
+              {{ authStore.myDetails?.fullName }}
+              <span
             class="flex w-3 h-3 me-3 bg-green-500 rounded-full"
             aria-hidden="true"
             tooltip="Online"
             v-if="authStore.isAuthenticated"
           ></span>
-          <div class="flex items-center justify-start rtl:justify-end">
-            <button
-              data-drawer-target="logo-sidebar"
-              data-drawer-toggle="logo-sidebar"
-              aria-controls="logo-sidebar"
-              type="button"
-              class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-            >
-              <span class="sr-only">Open sidebar</span>
-              <svg
-                class="w-6 h-6"
-                aria-hidden="true"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  clip-rule="evenodd"
-                  fill-rule="evenodd"
-                  d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                ></path>
-              </svg>
-            </button>
-          </div>
+          </button>
           <div
-            class="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse"
+            id="dropdownAvatar"
+            :class="(showUserMenu)? 'absolute top-[70px] right-2':'hidden' "
+            class="z-10  bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600"
           >
-            <!-- <button
-              type="button"
-              class="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-              id="user-menu-button"
-              aria-expanded="false"
-              data-dropdown-toggle="user-dropdown"
-              data-dropdown-placement="bottom"
+            <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+              <div>{{ authStore.myDetails?.fullName }}</div>
+              <div class="font-medium truncate">{{ authStore.myDetails?.email }}</div>
+            </div>
+            <ul
+              class="py-2 text-sm text-gray-700 dark:text-gray-200"
+              aria-labelledby="dropdownUserAvatarButton"
             >
-              <span class="sr-only">Open user menu</span>
-              <img
-                class="w-8 h-8 rounded-full"
-                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                alt="user photo"
-              />
-              <!-- <img
-                    class="w-8 h-8 rounded-full"
-                    src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                    alt="user photo"
-                  /> 
-            </button> -->
-            <!-- Dropdown menu -->
-            <!-- <div
-              class="z-50 absolute  my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600"
-              id="user-dropdown"
-            >
-              <div class="px-4 py-3">
-                <span class="block text-sm text-gray-900 dark:text-white"
-                  >Bonnie Green</span
+              <li>
+                <NuxtLink
+                  :to="'/'"
+                  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  >Dashboard</NuxtLink
                 >
-                <span
-                  class="block text-sm text-gray-500 truncate dark:text-gray-400"
-                  >name@flowbite.com</span
-                >
-              </div>
-              <ul
-                class="py-2"
-                aria-labelledby="user-menu-button"
+              </li>
+            </ul>
+            <div class="py-2">
+              <NuxtLink
+                v-if="authStore.isAuthenticated"
+                to="/auth/logout"
+                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                >Sign out</NuxtLink
               >
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    >Dashboard</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    >Settings</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    >Earnings</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    >Sign out</a
-                  >
-                </li>
-              </ul>
-            </div> -->
-            <button
-              data-collapse-toggle="navbar-user"
-              type="button"
-              class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-              aria-controls="navbar-user"
-              aria-expanded="false"
-            >
-              <span class="sr-only">Open main menu</span>
-              <svg
-                class="w-5 h-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 17 14"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M1 1h15M1 7h15M1 13h15"
-                />
-              </svg>
-            </button>
+            </div>
           </div>
-          <NuxtLink
-            v-if="authStore.isAuthenticated"
-            to="/auth/logout"
-            class="text-sm font-medium text-white hover:underline"
-            >Logout</NuxtLink
-          >
+          
         </div>
       </div>
     </nav>
@@ -156,6 +71,18 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/stores/authStore";
 const authStore = useAuthStore();
+
+const showUserMenu = ref(false);
+
+const getInitials = (fullName: string | undefined)  => {
+  if( fullName ){
+    return fullName
+      .split(' ')
+      .filter(word => word.length > 0)
+      .map(word => word[0].toUpperCase())
+      .join('');
+  }
+}
 </script>
 
 <style scoped></style>

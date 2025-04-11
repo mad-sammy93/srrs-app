@@ -1,7 +1,8 @@
 <template>
   <div class="relative">
-    <label class="block font-normal text-gray-500 dark:text-white">Members / Guest</label>
-    {{ props.selectedValues }}
+    <label class="block font-normal text-gray-500 dark:text-white"
+      >Members / Guest</label
+    >
     <div
       class="group rounded-sm border-gray-300 border border-input px-3 py-2 text-md ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-0"
       @keydown="handleKeyDown"
@@ -36,7 +37,7 @@
 
       <ul
         v-if="open && filteredOptions.length > 0"
-        class="absolute left-0 top-[57px] z-10 mt-1 w-full rounded-md border bg-white shadow-lg overflow-y-scroll max-h-[200px]"
+        class="absolute left-0 top-[68px] z-10 mt-1 w-full rounded-md border bg-white shadow-lg overflow-y-scroll max-h-[200px]"
       >
         <li
           v-for="option in filteredOptions"
@@ -51,8 +52,7 @@
     </div>
   </div>
 </template>
-
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 
 const props = defineProps({
@@ -64,14 +64,15 @@ const props = defineProps({
       Array.isArray(opts) &&
       opts.every(
         (o) =>
-          (typeof o.label === "string" && typeof o.value === "string") ||
-          typeof o.value === "number"
+          typeof o.label === "string" &&
+          typeof o.value === "string" &&
+          typeof o.id === "number"
       ),
   },
   selectedValues: {
     type: Array,
     required: false,
-    default: () => [],  // default empty array if no value is passed from parent
+    default: () => [],
   },
 });
 
@@ -80,22 +81,50 @@ const emit = defineEmits(["update:selected"]);
 const inputRef = ref(null);
 const open = ref(false);
 const inputValue = ref("");
+
+// This holds the selected full option objects (mapped from IDs)
 const selected = ref([]);
 
+// Map selected IDs to full option objects using `id`
+const updateSelectedFromIds = () => {
+  selected.value = props.selectedValues
+    .map((id) => props.options.find((opt) => opt.id === id))
+    .filter(Boolean); // Remove nulls if any id is not found
+};
+
+// Initial setup
+onMounted(() => {
+  updateSelectedFromIds();
+});
+
+// Watch for changes in IDs or options and remap
+watch(
+  [() => props.selectedValues, () => props.options],
+  () => {
+    updateSelectedFromIds();
+  },
+  { deep: true }
+);
+
+// Filter dropdown options
 const filteredOptions = computed(() =>
   props.options.filter(
     (f) =>
-      f?.label &&
-      !selected.value.some((s) => s.value === f.value) &&
+      !selected.value.some((s) => s.id === f.id) &&
       f.label.toLowerCase().includes(inputValue.value.toLowerCase())
   )
 );
 
+// Remove selected user
 const handleUnselect = (option) => {
-  selected.value = selected.value.filter((f) => f.value !== option.value);
-  emit("update:selected", selected.value); // Emit the updated selected array to parent
+  selected.value = selected.value.filter((f) => f.id !== option.id);
+  emit(
+    "update:selected",
+    selected.value.map((s) => s.id)
+  ); // Emit only IDs
 };
 
+// Key handling
 const handleKeyDown = (e) => {
   const input = inputRef.value;
   if (!input) return;
@@ -105,6 +134,10 @@ const handleKeyDown = (e) => {
     inputValue.value === ""
   ) {
     selected.value.pop();
+    emit(
+      "update:selected",
+      selected.value.map((s) => s.id)
+    );
   }
 
   if (e.key === "Escape") {
@@ -113,10 +146,11 @@ const handleKeyDown = (e) => {
   }
 };
 
+// Add new user to selection
 const selectOption = (option) => {
-  selected.value.push(option); // Add the selected option
-  emit("update:selected", selected.value); // Emit the updated selected array to parent
-  inputValue.value = ""; // Clear the input field
+  selected.value.push(option);
+  emit("update:selected", selected.value); // Emit only IDs
+  inputValue.value = "";
 };
 // Watch selected and emit when it changes
 watch(selected, (newVal) => {

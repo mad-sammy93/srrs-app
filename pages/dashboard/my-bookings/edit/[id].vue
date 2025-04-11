@@ -243,6 +243,7 @@
           <UIMoleculesMultiSelect
             :options="formattedOptions"
             @update:selected="handleSelected"
+            :selectedValues="form.memberIds"
             v-show="!loading"
           />
 

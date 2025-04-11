@@ -18,11 +18,11 @@
               class="p-2 border border-gray-300 rounded-md"
             />
             <button
-            class="p-2 ml-2 bg-blue-500 text-white rounded-md"
-            @click.prevent="applyFilters"
-          >
-            Search
-          </button>
+              class="p-2 ml-2 bg-blue-500 text-white rounded-md"
+              @click.prevent="applyFilters"
+            >
+              Search
+            </button>
           </div>
           <!-- Filter Button + Accordion -->
           <div class="relative">
@@ -79,21 +79,21 @@
                     v-show="openAccordion.date"
                     class="mt-2 pl-2"
                   >
-                    <label>From date
+                    <label
+                      >From date
                       <input
                         type="date"
                         v-model="filters.fromDate"
                         class="border rounded p-1 w-full"
                       />
-                      </label
-                    >
-                    <label>To date
+                    </label>
+                    <label
+                      >To date
                       <input
                         type="date"
                         v-model="filters.toDate"
                         class="border rounded p-1 w-full"
-                      /></label
-                    >
+                    /></label>
                   </div>
                 </div>
                 <!-- Status -->
@@ -114,7 +114,13 @@
                       class="border rounded w-full p-1"
                     >
                       <option value="">All Statuses</option>
-                      <option v-for="status in statusItems" :key="status.value" :value="status.value" >{{ status.label }}</option>
+                      <option
+                        v-for="status in statusItems"
+                        :key="status.value"
+                        :value="status.value"
+                      >
+                        {{ status.label }}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -159,8 +165,7 @@
             <th class="p-3 border">Action</th>
           </tr>
         </thead>
-        <tbody>
-          
+        <tbody v-if="totalMeetingCount>0">
           <tr
             v-for="(meeting, index) in paginatedMeetings"
             :key="index"
@@ -242,6 +247,12 @@
               </button>
             </td>
           </tr>
+        </tbody>
+        <tbody 
+          v-if="totalMeetingCount === 0"
+          class="text-xl text-slate-700 text-center "
+        >
+          <td colspan="9" class="py-8">No meetings booked <NuxtLink to="/dashboard/my-bookings/add" class="">Book meeting</NuxtLink></td> 
         </tbody>
       </table>
       <table
@@ -359,14 +370,10 @@
           </button>
         </div>
       </div>
-    </div> 
-
-    <div v-if="totalMeetingCount === 0" class="text-xl text-slate-700 text-center py-8">
-      There are no meetings
     </div>
 
     <!-- Pagination Controls -->
-    <div class="flex justify-between items-center mt-4 dark:text-white py-8" >
+    <div class="flex justify-between items-center mt-4 dark:text-white py-8">
       <button
         @click.prevent="prevPage"
         :disabled="currentPage === 1"
@@ -449,7 +456,12 @@ const props = defineProps({
     required: true,
   },
   rooms: {
-    type: Object as () => { id: number; roomName: string , pax: number, hexColor: string}[],
+    type: Object as () => {
+      id: number;
+      roomName: string;
+      pax: number;
+      hexColor: string;
+    }[],
     required: true,
   },
   statusItems: {
@@ -464,7 +476,7 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  totalMeetingCount :{
+  totalMeetingCount: {
     type: Number,
     required: true,
   },
@@ -493,7 +505,6 @@ interface Filters {
   [key: string]: string | number;
 }
 const updateFilter = (event: Event, filterKey: keyof typeof filters.value) => {
-
   // console.log("Search term:", filters.value);
   const target = event.target as HTMLInputElement | null;
   if (target) {

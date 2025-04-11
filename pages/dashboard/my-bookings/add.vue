@@ -143,9 +143,11 @@
           </div>
         </div>
         <div class="my-4 max-w-[1240px]">
+          {{ form.memberIds }}
           <UIMoleculesMultiSelect
             :options="formattedOptions"
             @update:selected="handleSelected"
+            :selectedValues="form.memberIds"
           />
         </div>
         <button
@@ -197,13 +199,18 @@ const meetingStore = useMeetingStore();
 
 const rooms = storeToRefs(roomStore).roomList;
 const users = storeToRefs(userStore).usersList;
+// const formattedOptions = ref<any[]>([]);
 
 //Watch  storeToRefs(userStore).usersList and upadte users
 watch(
   () => userStore.usersList,
   (newVal) => {
-    console.log("Users updated:", newVal);
-    users.value = newVal;
+    // console.log("Users updated:", newVal);
+    // formattedOptions.value = newVal.map((user: any) => ({
+    //   label: `${user.fullName} (${user.email})`,
+    //   id: user.id,
+    //   value: user.email,
+    // }))
   },
   { immediate: true } // This ensures the watcher triggers immediately
 );
@@ -260,9 +267,10 @@ const checkweekday = (id: number | undefined) => {
   return day?.name;
 };
 
+
 const formattedOptions = users.value?.map((user: any) => ({
-  label: `${user.fullName} (${user.email})`,
   id: user.id,
+  label: `${user.fullName} (${user.email})`,
   value: user.email,
 }));
 

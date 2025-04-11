@@ -37,7 +37,8 @@ export const useMeetingStore = defineStore('meetingStore', () => {
       if (response) {
         if (queryParams.myBookingsOnly) {
           myBookings.value = response.data.list
-          totalMeetingCount.value = 0
+          totalMeetingCount.value = response.data.pagination.totalItemCount
+        } else {
           bookings.value = response.data.list;
         }
         totalPages.value = response.data.pagination.numberOfPages;

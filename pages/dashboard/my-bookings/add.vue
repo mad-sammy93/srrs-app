@@ -143,7 +143,6 @@
           </div>
         </div>
         <div class="my-4 max-w-[1240px]">
-          {{ form.memberIds }}
           <UIMoleculesMultiSelect
             :options="formattedOptions"
             @update:selected="handleSelected"

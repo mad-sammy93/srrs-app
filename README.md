@@ -1,75 +1,71 @@
-# Nuxt Minimal Starter
+# 🚀 SRRS APP
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+  
 
-## Setup
+A Dockerized Vue 3 + TypeScript application for managing meetings and bookings.
 
-Make sure to install dependencies:
+  
 
-```bash
-# npm
-npm install
+## 📦 Prerequisites
 
-# pnpm
-pnpm install
+  
 
-# yarn
-yarn install
+- [Docker](https://www.docker.com/) installed on your machine
 
-# bun
-bun install
-```
+  
 
-## Development Server
+## 🐳 Getting Started
 
-Start the development server on `http://localhost:3000`:
+  
 
-```bash
-# npm
-npm run dev
+To run the project locally using Docker, follow these steps:
 
-# pnpm
-pnpm dev
+  
 
-# yarn
-yarn dev
+### 1. Clone the Repository
 
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
+  
 
 ```bash
-# npm
-npm run build
 
-# pnpm
-pnpm build
+git clone https://github.com/mad-sammy93/srrs-app.git
 
-# yarn
-yarn build
+cd srrs-app
 
-# bun
-bun run build
 ```
 
-Locally preview production build:
+## Build and Start the Containers
+  
+`docker compose up --build`
 
-```bash
-# npm
-npm run preview
 
-# pnpm
-pnpm preview
+## Stop the Containers
 
-# yarn
-yarn preview
+`docker compose down`
 
-# bun
-bun run preview
-```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Access the App
+
+`http://localhost`
+
+
+## alternate commands
+
+`sudo docker compose up --build`
+
+
+## Environment Variables
+
+
+API_BASE_URL=https://rr.dev.deploy.nl/v1
+
+SYNC_FUSION_API_KEY=Ngo9BigBOggjHTQxAR8/V1NMaF1cXGFCe0x3RHxbf1x1ZFJMYFxbQHJPMyBoS35Rc0VnWH5ed3VQRWlYV0N1VEBV
+
+## ## 🛠 Tech Stack
+
+- Vue 3
+
+- TypeScript    
+- Docker
+
+- Vite (or Vue CLI)

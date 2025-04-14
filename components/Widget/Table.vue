@@ -198,15 +198,7 @@
             <td class="p-3 border text-center">{{ meeting.paxCount }}</td>
             <td class="p-3 border text-center">{{ meeting.agenda }}</td>
             <td class="p-3 border text-center">
-              <span
-                class="flex justify-center items-center border-solid border-2 rounded-lg space-x-0"
-                :class="{
-                  'border-green-600': meetingStatus[index].value === 'UPCOMING',
-                  'border-blue-600':
-                    meetingStatus[index].value === 'IN_PROGRESS',
-                  'border-gray-600': meetingStatus[index].value === 'COMPLETED',
-                }"
-              >
+              <span class="flex justify-center items-center rounded-lg space-x-0" >
                 <span
                   class="flex w-2 h-2 mr-4 rounded-full"
                   :class="{
@@ -405,7 +397,7 @@ const deleteOption = ref<"SELECTED" | "SELECTED_AND_UPCOMING">("SELECTED");
 const disabledDelete = ref(false);
 
 const confirmDelete = (meeting: Meeting) => {
-  if (!meetingStatus) return noDeleteMeeting();
+  // if (!meetingStatus) return noDeleteMeeting();
 
   selectedMeeting.value = meeting;
   showDeleteModal.value = true;
